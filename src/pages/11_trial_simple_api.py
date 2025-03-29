@@ -1,36 +1,15 @@
 # 11_trial_simple_api.py
 import streamlit as st
-import requests
 import json
 
-
-def make_api_request(uri, method, headers=None, body=None):
-    try:
-        response = {}
-        if method in ["GET", "DELETE"]:
-            # request without body
-            response = requests.request(
-                method=method,
-                url=uri,
-                headers=headers,
-            )
-        else:
-            # request with body
-            response = requests.request(
-                method=method,
-                url=uri,
-                headers=headers,
-                json=json.loads(body) if body else None,
-            )
-        response.raise_for_status()
-        return response
-    except requests.exceptions.RequestException as e:
-        st.error(f"APIリクエストエラー: {str(e)}")
-        return None
+from functions.ApiRequestor import ApiRequestor
 
 
 def main():
     st.title("APIリクエストクライアント")
+
+    # インスタンス化
+    api_requestor = ApiRequestor()
 
     uri = st.text_input("URI", "https://dummyjson.com/products/1")
     method = st.selectbox("HTTPメソッド", ["GET", "POST", "PUT", "DELETE"])
@@ -61,7 +40,7 @@ def main():
             body = json.loads(request_body) if request_body else None
 
             # APIリクエスト送信
-            response = make_api_request(uri, method, headers, body)
+            response = api_requestor.send_request(uri, method, headers, body)
 
             # レスポンス表示
             if response:
@@ -71,8 +50,13 @@ def main():
                 except json.JSONDecodeError:
                     st.text(response.text)  # テキスト形式の場合
 
-        except Exception:
-            st.error(f"Error が置きました. Error: {Exception}")
+        except Exception as e:
+            # ユーザー向けメッセージ
+            st.error(
+                "リクエスト中にエラーが発生しました。詳細は以下をご確認ください。"
+            )
+            # 詳細な例外情報を表示
+            st.exception(e)
 
 
 if __name__ == "__main__":
