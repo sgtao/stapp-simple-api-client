@@ -7,7 +7,7 @@ import json
 def make_api_request(uri, method, headers=None, body=None):
     try:
         response = {}
-        if method == "GET":
+        if method in ["GET", "DELETE"]:
             # request without body
             response = requests.request(
                 method=method,
@@ -32,8 +32,8 @@ def make_api_request(uri, method, headers=None, body=None):
 st.title("APIリクエストクライアント")
 
 uri = st.text_input("URI", "https://dummyjson.com/products/1")
-# method = st.selectbox("HTTPメソッド", ["GET", "POST", "PUT", "DELETE"])
-method = st.selectbox("HTTPメソッド", ["GET", "POST", "PUT"])
+method = st.selectbox("HTTPメソッド", ["GET", "POST", "PUT", "DELETE"])
+# method = st.selectbox("HTTPメソッド", ["GET", "POST", "PUT"])
 
 # ヘッダー入力セクション
 with st.expander("リクエストヘッダー設定"):
@@ -45,22 +45,28 @@ with st.expander("リクエストヘッダー設定"):
         }""",
     )
 
-# メインフォーム
-# # リクエストボディ入力（POST, PUTの場合）
-# body = st.text_area("リクエストボディ (JSON)", height=200)
-with st.form("api_request_form"):
-    request_body = None
-    if method != "GET":
-        request_body = st.text_area("リクエストボディ (JSON形式)", "{}")
+# リクエストボディ入力（POST, PUTの場合のみ表示）
+request_body = None
+if method in ["POST", "PUT"]:
+    request_body = st.text_area("リクエストボディ (JSON形式)", "{}")
 
-    if st.form_submit_button("リクエストを送信"):
-        try:
-            headers = json.loads(headers_input) if headers_input else {}
-            response = make_api_request(uri, method, headers, request_body)
+# リクエスト送信ボタン
+if st.button("リクエストを送信"):
+    try:
+        # ヘッダーとボディのJSON形式検証
+        headers = json.loads(headers_input) if headers_input else {}
+        body = json.loads(request_body) if request_body else None
 
-            if response:
-                st.subheader("レスポンス")
-                st.json(response.json())
+        # APIリクエスト送信
+        response = make_api_request(uri, method, headers, request_body)
 
-        except json.JSONDecodeError:
-            st.error("ヘッダーまたはリクエストボディのJSON形式が不正です")
+        # レスポンス表示
+        if response:
+            st.subheader("レスポンス")
+            try:
+                st.json(response.json())  # JSON形式の場合
+            except json.JSONDecodeError:
+                st.text(response.text)  # テキスト形式の場合
+
+    except Exception:
+        st.error(f"Error が置きました. Error: {Exception}")
