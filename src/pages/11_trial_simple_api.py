@@ -1,8 +1,26 @@
 # 11_trial_simple_api.py
-import streamlit as st
 import json
 
+import pandas as pd
+import streamlit as st
+
 from functions.ApiRequestor import ApiRequestor
+
+
+def init_st_session_state():
+    # ヘッダー情報の初期化
+    if "header_df" not in st.session_state:
+        st.session_state.header_df = pd.DataFrame(
+            [
+                {"Property": "Content-Type", "Value": "application/json"},
+            ]
+        )
+
+
+def sidebar():
+    with st.sidebar:
+        with st.expander("session_state", expanded=False):
+            st.write(st.session_state)
 
 
 def main():
@@ -11,20 +29,56 @@ def main():
     # インスタンス化
     api_requestor = ApiRequestor()
 
-    uri = st.text_input("URI", "https://dummyjson.com/products/1")
     method = st.selectbox("HTTPメソッド", ["GET", "POST", "PUT", "DELETE"])
+    uri = st.text_input("URI", "https://dummyjson.com/products/1")
     # method = st.selectbox("HTTPメソッド", ["GET", "POST", "PUT"])
 
     # ヘッダー入力セクション
-    headers_input = None
+    header_dict = {}
     with st.expander("リクエストヘッダー設定"):
-        headers_input = st.text_area(
-            "カスタムヘッダー (JSON形式)",
-            help="""例: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer YOUR_TOKEN"
-            }""",
+        # headers_input = st.text_area(
+        #     "カスタムヘッダー (JSON形式)",
+        #     help="""例: {
+        #         "Content-Type": "application/json",
+        #         "Authorization": "Bearer YOUR_TOKEN"
+        #     }""",
+        # )
+
+        header_df = st.data_editor(
+            st.session_state.header_df,
+            num_rows="dynamic",
+            use_container_width=True,
         )
+        st.session_state.header_df = header_df
+
+        # ボタンで行追加・削除
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("行を追加"):
+                new_row = {"Property": "", "Value": ""}
+                st.session_state.header_df = pd.concat(
+                    [st.session_state.header_df, pd.DataFrame([new_row])],
+                    ignore_index=True,
+                )
+                st.rerun()
+        with col2:
+            if st.button("行を削除"):
+                if len(st.session_state["header_df"]) > 0:
+                    st.session_state["header_df"] = st.session_state[
+                        "header_df"
+                    ].iloc[:-1]
+                st.rerun()
+
+        # ヘッダー情報を辞書形式に変換
+        # header_dict = header_df.to_dict()
+        header_list = header_df.values.tolist()
+        # print(header_list)
+        # header_dict = {item[0]: item[1] for item in header_list}
+        for item in header_list:
+            key = item[0]
+            value = item[1]
+            # header_dict.append(dict({key, value}))
+            header_dict[key] = value
 
     # リクエストボディ入力（POST, PUTの場合のみ表示）
     request_body = None
@@ -36,11 +90,14 @@ def main():
     if st.button("リクエストを送信"):
         try:
             # ヘッダーとボディのJSON形式検証
-            headers = json.loads(headers_input) if headers_input else {}
+            # headers = json.loads(headers_input) if headers_input else {}
+            # headers = json.dumps(header_dict) if header_dict else {}
             body = json.loads(request_body) if request_body else None
 
             # APIリクエスト送信
-            response = api_requestor.send_request(uri, method, headers, body)
+            response = api_requestor.send_request(
+                uri, method, header_dict, body
+            )
 
             # レスポンス表示
             if response:
@@ -72,4 +129,6 @@ def main():
 
 
 if __name__ == "__main__":
+    init_st_session_state()
+    sidebar()
     main()
