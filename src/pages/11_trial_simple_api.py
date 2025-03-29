@@ -45,10 +45,14 @@ def main():
             # レスポンス表示
             if response:
                 st.subheader("レスポンス")
-                try:
-                    st.json(response.json())  # JSON形式の場合
-                except json.JSONDecodeError:
-                    st.text(response.text)  # テキスト形式の場合
+                with st.expander("レスポンスヘッダー："):
+                    st.text(response.headers)
+                    # st.json(json.loads(response.headers))
+                with st.expander("レスポンスボディ："):
+                    try:
+                        st.json(response.json())  # JSON形式の場合
+                    except json.JSONDecodeError:
+                        st.text(response.text)  # テキスト形式の場合
 
         except Exception as e:
             # ユーザー向けメッセージ
