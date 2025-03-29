@@ -1,5 +1,6 @@
 # ApiRequestor.py
 import requests
+import streamlit as st
 
 # import json
 
@@ -44,6 +45,19 @@ class ApiRequestor:
             # except json.JSONDecodeError:
             #     return response.text  # テキスト形式の場合
             return response
+
+        except requests.exceptions.HTTPError as http_err:
+            # HTTPエラー時の処理
+            st.error(f"HTTPエラー: {http_err}")
+            if hasattr(http_err.response, "status_code"):
+                st.error(f"ステータスコード: {http_err.response.status_code}")
+                st.error(f"理由: {http_err.response.reason}")
+            return None
+
+        except requests.exceptions.RequestException as req_err:
+            # その他のリクエストエラー時の処理
+            st.error(f"リクエストエラー: {req_err}")
+            return None
 
         except requests.exceptions.RequestException as e:
             return {"error": f"Request failed: {str(e)}"}
