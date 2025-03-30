@@ -4,6 +4,8 @@ import json
 import pandas as pd
 import streamlit as st
 
+from components.ApiRequestHeader import ApiRequestHeader
+from components.ApiResponseViewer import ApiResponseViewer
 from functions.ApiRequestor import ApiRequestor
 from functions.AppLogger import AppLogger
 
@@ -34,6 +36,8 @@ def main():
 
     # インスタンス化
     api_requestor = ApiRequestor()
+    request_header = ApiRequestHeader()
+    response_viewer = ApiResponseViewer()
 
     method = st.selectbox("HTTPメソッド", ["GET", "POST", "PUT", "DELETE"])
     uri = st.text_input("URI", "https://dummyjson.com/products/1")
@@ -42,49 +46,9 @@ def main():
     # ヘッダー入力セクション
     header_dict = {}
     with st.expander("リクエストヘッダー設定"):
-        # headers_input = st.text_area(
-        #     "カスタムヘッダー (JSON形式)",
-        #     help="""例: {
-        #         "Content-Type": "application/json",
-        #         "Authorization": "Bearer YOUR_TOKEN"
-        #     }""",
-        # )
-
-        header_df = st.data_editor(
-            st.session_state.header_df,
-            num_rows="dynamic",
-            use_container_width=True,
-        )
-        st.session_state.header_df = header_df
-
-        # ボタンで行追加・削除
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("行を追加"):
-                new_row = {"Property": "", "Value": ""}
-                st.session_state.header_df = pd.concat(
-                    [st.session_state.header_df, pd.DataFrame([new_row])],
-                    ignore_index=True,
-                )
-                st.rerun()
-        with col2:
-            if st.button("行を削除"):
-                if len(st.session_state["header_df"]) > 0:
-                    st.session_state["header_df"] = st.session_state[
-                        "header_df"
-                    ].iloc[:-1]
-                st.rerun()
-
-        # ヘッダー情報を辞書形式に変換
-        # header_dict = header_df.to_dict()
-        header_list = header_df.values.tolist()
-        # print(header_list)
-        # header_dict = {item[0]: item[1] for item in header_list}
-        for item in header_list:
-            key = item[0]
-            value = item[1]
-            # header_dict.append(dict({key, value}))
-            header_dict[key] = value
+        request_header.render_editor()
+        # ヘッダー情報を辞書形式で取得
+        header_dict = request_header.get_header_dict()
 
     # リクエストボディ入力（POST, PUTの場合のみ表示）
     request_body = None
@@ -108,22 +72,7 @@ def main():
             # レスポンス表示
             if response:
                 st.subheader("レスポンス")
-                # st.text(response.status_code)
-                st.metric(label="Status Code", value=response.status_code)
-
-                with st.expander("レスポンスヘッダー"):
-                    try:
-                        # 辞書形式のヘッダーをJSONとして表示
-                        st.json(dict(response.headers))
-                    except Exception as e:
-                        st.error(
-                            f"レスポンスヘッダーの表示中にエラーが発生しました: {str(e)}"
-                        )
-                with st.expander("レスポンスボディ"):
-                    try:
-                        st.json(response.json())  # JSON形式の場合
-                    except json.JSONDecodeError:
-                        st.text(response.text)  # テキスト形式の場合
+                response_viewer.render_viewer(response)
 
         except Exception as e:
             # ユーザー向けメッセージ
