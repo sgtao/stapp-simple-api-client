@@ -1,5 +1,5 @@
 # stapp-simple-apis-connect
-さまざまなAPIサービスを手軽にアクセスする[streamlit](https://streamlit.io/)アプリ。
+任意のAPIサービスにアクセスする[streamlit](https://streamlit.io/)アプリです。
 
 ## Usage
 - [poetry cli](https://python-poetry.org/docs/)を利用する

@@ -7,7 +7,7 @@ import streamlit as st
 from functions.ApiRequestor import ApiRequestor
 from functions.AppLogger import AppLogger
 
-TITLE = ""
+APP_TITLE = "APIクライアントアプリ"
 
 
 def init_st_session_state():
@@ -27,7 +27,10 @@ def sidebar():
 
 
 def main():
-    st.title("APIリクエストクライアント")
+    st.title(APP_TITLE)
+    """
+    任意のAPIサービスにアクセスする[streamlit](https://streamlit.io/)アプリです。
+    """
 
     # インスタンス化
     api_requestor = ApiRequestor()
@@ -132,7 +135,7 @@ def main():
 
 
 if __name__ == "__main__":
-    app_logger = AppLogger(__name__)
+    app_logger = AppLogger(APP_TITLE)
     app_logger.app_start()
     init_st_session_state()
     sidebar()
