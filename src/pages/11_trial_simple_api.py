@@ -4,6 +4,7 @@ import json
 import pandas as pd
 import streamlit as st
 
+from components.ApiKey import ApiKey
 from components.ApiRequestHeader import ApiRequestHeader
 from components.ApiResponseViewer import ApiResponseViewer
 from functions.ApiRequestor import ApiRequestor
@@ -13,17 +14,27 @@ APP_TITLE = "APIクライアントアプリ"
 
 
 def init_st_session_state():
-    # ヘッダー情報の初期化
+    refreshed_state = False
     if "header_df" not in st.session_state:
         st.session_state.header_df = pd.DataFrame(
             [
                 {"Property": "Content-Type", "Value": "application/json"},
             ]
         )
+        refreshed_state = True
+    if "api_key" not in st.session_state:
+        st.session_state.api_key = ""
+        refreshed_state = True
+    if refreshed_state:
+        st.rerun()
 
 
 def sidebar():
+    # インスタンス化
+    api_key_component = ApiKey()
+
     with st.sidebar:
+        api_key_component.input_key()
         with st.expander("session_state", expanded=False):
             st.write(st.session_state)
 
@@ -33,11 +44,10 @@ def main():
     """
     任意のAPIサービスにアクセスする[streamlit](https://streamlit.io/)アプリです。
     """
-
     # インスタンス化
-    api_requestor = ApiRequestor()
     request_header = ApiRequestHeader()
     response_viewer = ApiResponseViewer()
+    api_requestor = ApiRequestor()
 
     method = st.selectbox("HTTPメソッド", ["GET", "POST", "PUT", "DELETE"])
     uri = st.text_input("URI", "https://dummyjson.com/products/1")
