@@ -5,6 +5,9 @@ import pandas as pd
 import streamlit as st
 
 from functions.ApiRequestor import ApiRequestor
+from functions.AppLogger import AppLogger
+
+TITLE = ""
 
 
 def init_st_session_state():
@@ -129,6 +132,8 @@ def main():
 
 
 if __name__ == "__main__":
+    app_logger = AppLogger(__name__)
+    app_logger.app_start()
     init_st_session_state()
     sidebar()
     main()

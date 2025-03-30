@@ -1,26 +1,16 @@
 # ApiRequestor.py
 import requests
-import logging
 
 import streamlit as st
 
-# import json
-
-# ログ設定
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        # logging.StreamHandler(),  # コンソール出力
-        logging.FileHandler("logs/api_request.log"),  # ファイル出力
-    ],
-)
+from functions.AppLogger import AppLogger
 
 
 class ApiRequestor:
     def __init__(self):
         self.session = requests.Session()
-        self.logger = logging.getLogger(__name__)
+        # self.logger = logging.getLogger(__name__)
+        self.api_logger = AppLogger(__name__)
 
     def send_request(self, url, method, headers=None, body=None):
         """
@@ -33,11 +23,7 @@ class ApiRequestor:
         """
         try:
             # メソッド開始時のログ
-            self.logger.info(f"Starting request: {method} {url}")
-            if headers:
-                self.logger.debug(f"Headers: {headers}")
-            if body:
-                self.logger.debug(f"Body: {body}")
+            self.api_logger.api_start_log(url, method, headers, body)
 
             # メソッドごとの処理
             if method in ["GET", "DELETE"]:
@@ -60,20 +46,14 @@ class ApiRequestor:
             response.raise_for_status()
 
             # メソッド終了時のログ
-            self.logger.info(f"Request completed with {response.status_code}")
-            self.logger.debug(f"Response headers: {response.headers}")
-            self.logger.debug(f"Response body: {response.text}")
+            self.api_logger.api_success_log(response)
 
             # レスポンス解析
-            # try:
-            #     return response.json()  # JSON形式の場合
-            # except json.JSONDecodeError:
-            #     return response.text  # テキスト形式の場合
             return response
 
         except requests.exceptions.HTTPError as http_err:
             # HTTPエラー時のログ
-            self.logger.error(f"HTTP error occurred: {http_err}")
+            self.api_logger.error_log(f"HTTP error occurred: {http_err}")
 
             # HTTPエラー時の処理
             st.error(f"HTTPエラー: {http_err}")
@@ -84,10 +64,10 @@ class ApiRequestor:
 
         except requests.exceptions.RequestException as req_err:
             # その他のリクエストエラー時のログ
-            self.logger.error(f"Request error occurred: {req_err}")
+            self.api_logger.error_log(f"Request error occurred: {req_err}")
             raise
 
         except Exception as e:
             # その他例外発生時のログ
-            self.logger.exception(f"An unexpected error occurred: {e}")
+            self.api_logger.error_log(f"An unexpected error occurred: {e}")
             raise
