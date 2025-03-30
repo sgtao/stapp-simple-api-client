@@ -46,7 +46,7 @@ def sidebar():
 
 
 def main():
-    st.title(APP_TITLE)
+    st.title(f"🚀 {APP_TITLE}")
     """
     任意のAPIサービスにアクセスする[streamlit](https://streamlit.io/)アプリです。
     """

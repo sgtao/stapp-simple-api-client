@@ -1,4 +1,4 @@
-# stapp-simple-apis-connect
+# stapp-simple-api-client
 任意のAPIサービスにアクセスする[streamlit](https://streamlit.io/)アプリです。
 
 ## Usage

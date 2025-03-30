@@ -14,7 +14,7 @@ class UserInputs:
     def render_property_path(self):
         # レスポンスの抽出プロパティパス指定
         st.session_state.user_property_path = st.text_input(
-            "Runner UserName",
+            "Response Property Path:",
             type="default",
             placeholder="抽出するプロパティパス",
             help="例: tags[0].completion.value",

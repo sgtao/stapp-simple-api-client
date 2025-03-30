@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "stapp-simple-apis-connect"
+name = "stapp-simple-api-client"
 version = "0.1.0"
 description = "さまざまなAPIサービスを手軽にアクセスしてみる"
 authors = ["Shogo Ogami <sg.tao.so@gmail.com>"]
