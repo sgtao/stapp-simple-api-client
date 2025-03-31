@@ -26,6 +26,9 @@ def init_st_session_state():
     if "api_key" not in st.session_state:
         st.session_state.api_key = ""
         refreshed_state = True
+    if "use_dynamic_inputs" not in st.session_state:
+        st.session_state.use_dynamic_inputs = False
+        refreshed_state = True
     if "user_property_path" not in st.session_state:
         st.session_state.user_property_path = ""
         refreshed_state = True
@@ -40,6 +43,7 @@ def sidebar():
 
     with st.sidebar:
         api_key_component.input_key()
+        user_inputs_component.render_dynamic_inputs()
         user_inputs_component.render_property_path()
         with st.expander("session_state", expanded=False):
             st.write(st.session_state)
@@ -58,6 +62,9 @@ def main():
     method = st.selectbox("HTTPメソッド", ["GET", "POST", "PUT", "DELETE"])
     uri = st.text_input("URI", "https://dummyjson.com/products/1")
     # method = st.selectbox("HTTPメソッド", ["GET", "POST", "PUT"])
+
+    # 動的に入力フィールドを生成するかのチェックボックス
+    st.session_state.use_dynamic_inputs = st.checkbox("動的な入力を利用する")
 
     # ヘッダー入力セクション
     header_dict = {}
@@ -78,6 +85,12 @@ def main():
             # ヘッダーとボディのJSON形式検証
             # headers = json.loads(headers_input) if headers_input else {}
             # headers = json.dumps(header_dict) if header_dict else {}
+            if st.session_state.use_dynamic_inputs:
+                for i in range(st.session_state.num_inputs):
+                    key = f"user_input_{i}"
+                    value = st.session_state[f"user_input_{i}"]
+                    request_body = request_body.replace(f"＜{key}＞", value)
+
             body = json.loads(request_body) if request_body else None
 
             # APIリクエスト送信

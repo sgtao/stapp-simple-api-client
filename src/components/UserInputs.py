@@ -20,3 +20,14 @@ class UserInputs:
             help="例: tags[0].completion.value",
             value=self.user_property_path,
         )
+
+    def render_dynamic_inputs(self):
+        st.session_state.num_inputs = st.number_input(
+            "Request 入力指定数", min_value=1, max_value=10, value=1, step=1
+        )
+
+        # 動的にテキスト入力を生成
+        for i in range(st.session_state.num_inputs):
+            st.session_state[f"user_input_{i}"] = st.text_input(
+                f"user_input_{i} の値", f"user_input_{i}の初期値"
+            )
