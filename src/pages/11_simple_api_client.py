@@ -16,12 +16,21 @@ APP_TITLE = "APIクライアントアプリ"
 
 def init_st_session_state():
     refreshed_state = False
+    if "method" not in st.session_state:
+        st.session_state.method = "GET"
+        refreshed_state = True
+    if "uri" not in st.session_state:
+        st.session_state.uri = "https://dummyjson.com/products/1"
+        refreshed_state = True
     if "header_df" not in st.session_state:
         st.session_state.header_df = pd.DataFrame(
             [
                 {"Property": "Content-Type", "Value": "application/json"},
             ]
         )
+        refreshed_state = True
+    if "req_body" not in st.session_state:
+        st.session_state.req_body = "{}"
         refreshed_state = True
     if "api_key" not in st.session_state:
         st.session_state.api_key = ""
@@ -59,8 +68,20 @@ def main():
     response_viewer = ApiResponseViewer()
     api_requestor = ApiRequestor()
 
-    method = st.selectbox("HTTPメソッド", ["GET", "POST", "PUT", "DELETE"])
-    uri = st.text_input("URI", "https://dummyjson.com/products/1")
+    # コールバック関数：選択変更時にセッションステートを更新
+    def update_model():
+        st.session_state.method = st.session_state.selected_method
+
+    methods = ["GET", "POST", "PUT", "DELETE"]
+    method = st.selectbox(
+        label="HTTPメソッド",
+        options=methods,
+        index=methods.index(st.session_state.method),
+        key="selected_method",
+        on_change=update_model,
+    )
+    # uri = st.text_input("URI", "https://dummyjson.com/products/1")
+    uri = st.text_input(label="URI", value=st.session_state.uri)
     # method = st.selectbox("HTTPメソッド", ["GET", "POST", "PUT"])
 
     # 動的に入力フィールドを生成するかのチェックボックス
@@ -77,11 +98,18 @@ def main():
     request_body = None
     if method in ["POST", "PUT"]:
         with st.expander("リクエストボディ設定"):
-            request_body = st.text_area("リクエストボディ (JSON形式)", "{}")
+            request_body = st.text_area(
+                label="リクエストボディ (JSON形式)",
+                value=st.session_state.req_body,
+            )
 
     # リクエスト送信ボタン
     if st.button("リクエストを送信"):
         try:
+            # 確定情報のセット
+            st.session_state.uri = uri
+            st.session_state.method = method
+            st.session_state.req_body = request_body
             # ヘッダーとボディのJSON形式検証
             # headers = json.loads(headers_input) if headers_input else {}
             # headers = json.dumps(header_dict) if header_dict else {}
