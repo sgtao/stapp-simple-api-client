@@ -19,6 +19,9 @@ class ClientController:
         if type == "save_state":
             self.save_session_state()
             self._modal_closer()
+        elif type == "load_state":
+            self.load_session_state()
+            self._modal_closer()
         else:
             st.write("No Definition.")
 
@@ -56,6 +59,62 @@ class ClientController:
                 mime="text/yaml",
             )
 
+    # 『読込み』モーダル：
+    def _on_file_upload(self):
+        st.session_state.config = None
+
+    def _load_config(self, uploaded_yaml):
+        """
+        YAMLファイルを読み込み、ユーザー入力を初期化する
+
+        Args:
+            uploaded_file: Streamlitのfile_uploaderから受け取るファイルオブジェクト
+
+        Returns:
+            Dict[str, Any]: 処理済みの設定データ
+        """
+        try:
+            config = yaml.safe_load(uploaded_yaml)
+            # st.session_state.user_inputs = []
+            # st.session_state.min_user_inputs =
+            # _initialize_user_inputs(config)
+            return config
+        except yaml.YAMLError as e:
+            st.error(f"YAML解析エラー: {str(e)}")
+            return {}
+        except Exception as e:
+            st.error(f"設定ファイルの処理に失敗しました: {str(e)}")
+            return {}
+
+    def _set_session_state(self, config):
+        if "session_state" not in config:
+            return
+
+        cfg_session_state = config.get("session_state", {})
+        if "method" in cfg_session_state:
+            st.session_state.method = cfg_session_state.get("method")
+        if "uri" in cfg_session_state:
+            st.session_state.uri = cfg_session_state.get("uri")
+
+    def load_session_state(self):
+
+        uploaded_file = st.file_uploader(
+            label="Choose a YAML config file",
+            type="yaml",
+            on_change=self._on_file_upload,
+        )
+
+        if uploaded_file is not None and st.session_state.config is None:
+            try:
+                config = self._load_config(uploaded_file)
+                if config:
+                    st.session_state.config = config
+                    self._set_session_state(config)
+                    # main_viewer.config_viewer(st.session_state.config)
+                    st.rerun()
+            except yaml.YAMLError as e:
+                st.error(f"Error loading YAML file: {e}")
+
     def _clear__states(self):
         # st.session_state.min_user_inputs = 0
         # st.session_state.user_inputs = []
@@ -83,13 +142,18 @@ class ClientController:
                 st.rerun()
         with col2:
             if st.button(
-                help="Save Helium States",
+                help="Save Session States",
                 label="📥",
                 disabled=st.session_state.api_running,
             ):
                 self.modal("save_state")
         with col3:
-            pass
+            if st.button(
+                help="Load Session States",
+                label="📤",
+                disabled=st.session_state.api_running,
+            ):
+                self.modal("load_state")
         with col4:
             pass
         with col5:
