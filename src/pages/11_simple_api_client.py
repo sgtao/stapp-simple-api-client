@@ -7,6 +7,7 @@ import streamlit as st
 from components.ApiKey import ApiKey
 from components.ApiRequestHeader import ApiRequestHeader
 from components.ApiResponseViewer import ApiResponseViewer
+from components.ClientController import ClientController
 from components.UserInputs import UserInputs
 from functions.ApiRequestor import ApiRequestor
 from functions.AppLogger import AppLogger
@@ -41,6 +42,9 @@ def init_st_session_state():
     if "user_property_path" not in st.session_state:
         st.session_state.user_property_path = ""
         refreshed_state = True
+    if "api_running" not in st.session_state:
+        st.session_state.api_running = False
+        refreshed_state = True
     if refreshed_state:
         st.rerun()
 
@@ -49,6 +53,7 @@ def sidebar():
     # インスタンス化
     api_key_component = ApiKey()
     user_inputs_component = UserInputs()
+    client_controller = ClientController()
 
     with st.sidebar:
         api_key_component.input_key()
@@ -56,6 +61,7 @@ def sidebar():
         user_inputs_component.render_property_path()
         with st.expander("session_state", expanded=False):
             st.write(st.session_state)
+        client_controller.render_buttons()
 
 
 def main():
