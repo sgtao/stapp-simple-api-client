@@ -34,15 +34,19 @@ class ClientController:
     # 『保存』モーダル：
     def save_session_state(self):
         with st.expander("Save Helium State ?", expanded=False):
-            pad = "stappHeliumRunnerState.yaml"
+            pad = "stappApiClientState.yaml"
             time_stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
             file_name = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_{pad}"
             # セッション状態からパラメータを取得
             save_data = {
                 "time_stamp": time_stamp,
                 "session_state": {
-                    "uri": st.session_state.uri,
                     "method": st.session_state.method,
+                    "uri": st.session_state.uri,
+                    # "header_df": st.session_state.header_df,
+                    "req_body": st.session_state.req_body,
+                    "use_dynamic_inputs": st.session_state.use_dynamic_inputs,
+                    "user_property_path": st.session_state.user_property_path,
                 },
             }
 
@@ -91,10 +95,29 @@ class ClientController:
             return
 
         cfg_session_state = config.get("session_state", {})
+        # "method": st.session_state.method,
+        # "uri": st.session_state.uri,
+        # "header_df": st.session_state.header_df,
+        # "req_body": st.session_state.req_body,
+        # "use_dynamic_inputs": st.session_state.use_dynamic_inputs,
+        # "user_property_path": st.session_state.user_property_path,
         if "method" in cfg_session_state:
             st.session_state.method = cfg_session_state.get("method")
         if "uri" in cfg_session_state:
             st.session_state.uri = cfg_session_state.get("uri")
+        # if "header_df" in cfg_session_state:
+        #     st.session_state.uri = cfg_session_state.get("header_df")
+        if "req_body" in cfg_session_state:
+            st.session_state.req_body = cfg_session_state.get("req_body")
+        if "use_dynamic_inputs" in cfg_session_state:
+            if cfg_session_state.get("use_dynamic_inputs") == "true":
+                st.session_state.use_dynamic_inputs = True
+            else:
+                st.session_state.use_dynamic_inputs = False
+        if "user_property_path" in cfg_session_state:
+            st.session_state.user_property_path = cfg_session_state.get(
+                "user_property_path"
+            )
 
     def load_session_state(self):
 
