@@ -12,7 +12,8 @@ from components.UserInputs import UserInputs
 from functions.ApiRequestor import ApiRequestor
 from functions.AppLogger import AppLogger
 
-APP_TITLE = "APIクライアントアプリ"
+# APP_TITLE = "APIクライアントアプリ"
+APP_TITLE = "Simple Api Client"
 
 
 def init_st_session_state():
@@ -91,7 +92,10 @@ def main():
     # method = st.selectbox("HTTPメソッド", ["GET", "POST", "PUT"])
 
     # 動的に入力フィールドを生成するかのチェックボックス
-    st.session_state.use_dynamic_inputs = st.checkbox("動的な入力を利用する")
+    st.session_state.use_dynamic_inputs = st.checkbox(
+        label="動的な入力を利用する",
+        value=st.session_state.use_dynamic_inputs,
+    )
 
     # ヘッダー入力セクション
     header_dict = {}

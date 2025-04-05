@@ -13,3 +13,5 @@ st.page_link(
     label="Go to simple_api_client App",
     icon="🚀",
 )
+# ログ表示ページへのリンク
+st.page_link("pages/12_logs_viewer.py", label="View Logs", icon="📄")
