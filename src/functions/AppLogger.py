@@ -1,12 +1,14 @@
 # AppLogger.py
+import logging
 import os
 
-import logging
+LOG_DIR = "logs"
+DEFAULT_LOGFILE_PATH = "logs/api_request.log"
 
 
 class AppLogger:
     def __init__(
-        self, name, log_file="logs/api_request.log", level=logging.DEBUG
+        self, name, log_file=DEFAULT_LOGFILE_PATH, level=logging.DEBUG
     ):
         """
         ロガーを設定するクラス
@@ -15,17 +17,28 @@ class AppLogger:
         :param level: ログレベル (DEBUG, INFO, WARNING, ERROR, CRITICAL)
         """
         self.name = name
-        self.logger = logging.getLogger(name)
-        self.logger.setLevel(level)
+        self.log_file = log_file
+        self.log_level = level
 
         # ログディレクトリの作成
-        LOG_DIR = "logs"
-        if log_file == "logs/api_request.log" and not os.path.exists(LOG_DIR):
+        if self.log_file == DEFAULT_LOGFILE_PATH and not os.path.exists(
+            LOG_DIR
+        ):
             os.makedirs(LOG_DIR)
 
+        self.logger = logging.getLogger(name)
+        self.setup_logger()
+
+    def setup_logger(self):
+        # 既存のハンドラーを削除
+        for handler in self.logger.handlers[:]:
+            self.logger.removeHandler(handler)
+
+        self.logger.setLevel(self.log_level)
+
         # ファイルハンドラー
-        file_handler = logging.FileHandler(log_file)
-        file_handler.setLevel(level)
+        file_handler = logging.FileHandler(self.log_file)
+        file_handler.setLevel(self.log_level)
 
         # フォーマッター
         formatter = logging.Formatter(
@@ -33,9 +46,8 @@ class AppLogger:
         )
         file_handler.setFormatter(formatter)
 
-        # ハンドラー追加（重複追加を防ぐ）
-        if not self.logger.hasHandlers():
-            self.logger.addHandler(file_handler)
+        # ハンドラー追加
+        self.logger.addHandler(file_handler)
 
     def app_start(self):
         self.logger.info(f"Start App: {self.name}")
@@ -56,3 +68,10 @@ class AppLogger:
     def error_log(self, message):
         # メソッド終了時のログ
         self.logger.error(message)
+
+    def info_log(self, message):
+        # 任意タイミングのログ
+        self.logger.info(message)
+
+    def get_logfile_name(self):
+        return self.log_file
