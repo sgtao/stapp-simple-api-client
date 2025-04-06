@@ -1,4 +1,5 @@
 # get_jp_wikipedia_article.yaml
+title: Wikipedia(JP)で用語（user_input_0）の記事を取得します
 session_state:
   header_df:
   - Property: Content-Type

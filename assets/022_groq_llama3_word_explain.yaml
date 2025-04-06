@@ -1,4 +1,5 @@
 # groq_llama3_word_explain.yaml
+title: Grop API（llama3.3）へ用語（user_0）と補足（user_1）を使って解説します
 session_state:
   header_df:
   - Property: Content-Type

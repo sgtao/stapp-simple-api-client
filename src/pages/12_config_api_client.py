@@ -58,8 +58,16 @@ def main():
     # 選択されたコンフィグファイルを読み込む
     if selected_config_file:
         config = load_config_from_yaml(selected_config_file)
-        st.write("##### Config states")
-        st.write(config)
+        if "title" in config:
+            st.info(f"{config.get('title')}")
+        # st.write("##### Config states")
+        with st.expander(
+            label="##### Config states",
+            expanded=False,
+            icon="📝",
+        ):
+            st.code(selected_config_file)
+            st.write(config)
 
         # 読み込んだコンフィグをセッションステートに適用
         # apply_config_to_session_state(config)
