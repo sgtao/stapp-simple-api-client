@@ -120,20 +120,21 @@ def main():
             st.session_state.uri = uri
             st.session_state.method = method
             st.session_state.req_body = request_body
-            # ヘッダーとボディのJSON形式検証
-            # headers = json.loads(headers_input) if headers_input else {}
-            # headers = json.dumps(header_dict) if header_dict else {}
-            if st.session_state.use_dynamic_inputs:
-                for i in range(st.session_state.num_inputs):
-                    key = f"user_input_{i}"
-                    value = st.session_state[f"user_input_{i}"]
-                    request_body = request_body.replace(f"＜{key}＞", value)
 
-            body = json.loads(request_body) if request_body else None
+            # URIとリクエストボディのJSON形式検証
+            sent_uri = uri
+            sent_body = request_body
+            if st.session_state.use_dynamic_inputs:
+                sent_uri = api_requestor.replace_uri(uri)
+                if request_body:
+                    sent_body = api_requestor.replace_body(request_body)
+
+            # st.text(sent_body)
+            body_json = json.loads(sent_body) if request_body else None
 
             # APIリクエスト送信
             response = api_requestor.send_request(
-                uri, method, header_dict, body
+                sent_uri, method, header_dict, body_json
             )
 
             # レスポンス表示

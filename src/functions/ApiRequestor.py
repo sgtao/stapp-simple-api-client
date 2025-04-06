@@ -1,5 +1,6 @@
 # ApiRequestor.py
 import requests
+import urllib.parse
 
 import streamlit as st
 
@@ -71,3 +72,21 @@ class ApiRequestor:
             # その他例外発生時のログ
             self.api_logger.error_log(f"An unexpected error occurred: {e}")
             raise
+
+    def replace_uri(self, uri):
+        replaced_uri = uri
+        for i in range(st.session_state.num_inputs):
+            key = f"user_input_{i}"
+            value = urllib.parse.quote(st.session_state[f"user_input_{i}"])
+            replaced_uri = replaced_uri.replace(f"＜{key}＞", value)
+
+        return replaced_uri
+
+    def replace_body(self, body):
+        replaced_body = body
+        for i in range(st.session_state.num_inputs):
+            key = f"user_input_{i}"
+            value = st.session_state[f"user_input_{i}"].replace('"', "'")
+            replaced_body = replaced_body.replace(f"＜{key}＞", value)
+
+        return replaced_body

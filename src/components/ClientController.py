@@ -33,7 +33,7 @@ class ClientController:
 
     # 『保存』モーダル：
     def save_session_state(self):
-        with st.expander("Save Helium State ?", expanded=False):
+        with st.expander("Save Session State ?", expanded=False):
             pad = "stappApiClientState.yaml"
             time_stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
             file_name = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_{pad}"
