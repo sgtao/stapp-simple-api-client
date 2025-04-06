@@ -116,7 +116,7 @@ class ClientController:
             st.error(f"設定ファイルの処理に失敗しました: {str(e)}")
             return {}
 
-    def _set_session_state(self, config):
+    def set_session_state(self, config):
         if "session_state" not in config:
             return
 
@@ -184,7 +184,7 @@ class ClientController:
                 config = self._load_config(uploaded_file)
                 if config:
                     # st.session_state.config = config
-                    self._set_session_state(config)
+                    self.set_session_state(config)
                     # main_viewer.config_viewer(st.session_state.config)
                     st.rerun()
             except yaml.YAMLError as e:

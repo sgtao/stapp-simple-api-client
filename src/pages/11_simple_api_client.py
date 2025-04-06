@@ -1,7 +1,6 @@
 # 11_trial_simple_api.py
 import json
 
-# import pandas as pd
 import streamlit as st
 
 from components.ApiKey import ApiKey
@@ -108,6 +107,6 @@ def main():
 if __name__ == "__main__":
     app_logger = AppLogger(APP_TITLE)
     app_logger.app_start()
-    init_st_session_state()
+    # init_st_session_state()
     sidebar()
     main()
