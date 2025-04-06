@@ -14,4 +14,4 @@ st.page_link(
     icon="🚀",
 )
 # ログ表示ページへのリンク
-st.page_link("pages/12_logs_viewer.py", label="View Logs", icon="📄")
+st.page_link("pages/21_logs_viewer.py", label="View Logs", icon="📄")
