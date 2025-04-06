@@ -9,10 +9,8 @@ import streamlit as st
 
 class ClientController:
     def __init__(self) -> None:
-        self._initialize_session_state()
-
-    def _initialize_session_state(self) -> None:
-        pass
+        if "api_running" not in st.session_state:
+            st.session_state.api_running = False
 
     @st.dialog("Setting Info.")
     def modal(self, type):
@@ -192,12 +190,8 @@ class ClientController:
             except yaml.YAMLError as e:
                 st.error(f"Error loading YAML file: {e}")
 
-    def _clear__states(self):
-        # st.session_state.min_user_inputs = 0
-        # st.session_state.user_inputs = []
+    def _clear_states(self):
         st.session_state.api_running = False
-        # st.session_state.hl_runner = []
-        # st.session_state.config = None
 
     def render_buttons(self):
         st.write("##### Runner Ctrl.")
@@ -214,8 +208,7 @@ class ClientController:
                 label="⏹️",
                 disabled=(st.session_state.api_running is False),
             ):
-                # st.stop()
-                st.session_state.api_running = False
+                self._clear_states()
                 st.rerun()
         with col2:
             if st.button(
