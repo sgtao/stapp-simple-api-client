@@ -32,6 +32,23 @@ class ClientController:
             st.rerun()
 
     # 『保存』モーダル：
+    def _header_df_to_dict(self, header_df):
+        dict_list = []
+        records_list = header_df.to_dict(orient="records")
+        for item in records_list:
+            if item["Property"] == "Authorization":
+                # auth_value = item["Value"].replace(
+                #     "Bearer .*", "Bearer ＜API_KEY＞"
+                # )
+                auth_value = item["Value"].replace(
+                    st.session_state.api_key, "＜API_KEY＞"
+                )
+                dict_list.append({item["Property"]: auth_value})
+            else:
+                dict_list.append({item["Property"]: item["Value"]})
+
+        return dict_list
+
     def save_session_state(self):
         with st.expander("Save Session State ?", expanded=False):
             pad = "stappApiClientState.yaml"
@@ -44,6 +61,9 @@ class ClientController:
                     "method": st.session_state.method,
                     "uri": st.session_state.uri,
                     # "header_df": st.session_state.header_df,
+                    "header_df": self._header_df_to_dict(
+                        st.session_state.header_df
+                    ),
                     "req_body": st.session_state.req_body,
                     "use_dynamic_inputs": st.session_state.use_dynamic_inputs,
                     "user_property_path": st.session_state.user_property_path,
