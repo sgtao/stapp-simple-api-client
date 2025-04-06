@@ -3,6 +3,7 @@ from datetime import datetime
 import time
 import yaml
 
+import pandas as pd
 import streamlit as st
 
 
@@ -43,9 +44,15 @@ class ClientController:
                 auth_value = item["Value"].replace(
                     st.session_state.api_key, "＜API_KEY＞"
                 )
-                dict_list.append({item["Property"]: auth_value})
+                # dict_list.append({item["Property"]: auth_value})
+                dict_list.append(
+                    {"Property": item["Property"], "Value": auth_value}
+                )
             else:
-                dict_list.append({item["Property"]: item["Value"]})
+                # dict_list.append({item["Property"]: item["Value"]})
+                dict_list.append(
+                    {"Property": item["Property"], "Value": item["Value"]}
+                )
 
         return dict_list
 
@@ -127,6 +134,31 @@ class ClientController:
             st.session_state.uri = cfg_session_state.get("uri")
         # if "header_df" in cfg_session_state:
         #     st.session_state.uri = cfg_session_state.get("header_df")
+
+        if "header_df" in cfg_session_state:
+            get_header = cfg_session_state.get("header_df")
+            header_list = []
+            for header_item in get_header:
+                if header_item["Property"] == "Authorization":
+                    auth_value = header_item["Value"].replace(
+                        "＜API_KEY＞", st.session_state.api_key
+                    )
+                    header_list.append(
+                        {
+                            "Property": header_item["Property"],
+                            "Value": auth_value,
+                        }
+                    )
+                else:
+                    header_list.append(
+                        {
+                            "Property": header_item["Property"],
+                            "Value": header_item["Value"],
+                        }
+                    )
+            header_df = pd.DataFrame(header_list)
+            st.session_state.header_df = header_df
+
         if "req_body" in cfg_session_state:
             st.session_state.req_body = cfg_session_state.get("req_body")
         if "use_dynamic_inputs" in cfg_session_state:
