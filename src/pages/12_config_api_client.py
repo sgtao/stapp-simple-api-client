@@ -16,6 +16,7 @@ from functions.AppLogger import AppLogger
 
 APP_TITLE = "Config Api Client"
 ASSETS_DIR = "assets"
+APPEND_DIR = "privates"
 
 
 def load_config_from_yaml(file_path):
@@ -30,6 +31,9 @@ def apply_config_to_session_state(config):
 
 def main():
     st.title(f"🚀 {APP_TITLE}")
+    """
+    `assets`と`privates`配下のYAMLファイルを使ってAPIサービスにアクセスします
+    """
 
     # 以下は11_simple_api_client.pyと同様のAPIリクエスト部分
     request_header = ApiRequestHeader()
@@ -40,6 +44,9 @@ def main():
 
     # assetsフォルダからyamlファイルを選択
     config_files = glob.glob(os.path.join(ASSETS_DIR, "*.yaml"))
+    for private_config in glob.glob(os.path.join(APPEND_DIR, "*.yaml")):
+        config_files.append(private_config)
+
     if not config_files:
         st.warning(
             f"No YAML config files found in '{ASSETS_DIR}'. Please add some."
