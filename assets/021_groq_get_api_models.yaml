@@ -1,0 +1,12 @@
+# groq_get_api_models.yaml
+session_state:
+  header_df:
+  - Property: Content-Type
+    Value: application/json
+  - Property: Authorization
+    Value: Bearer ＜API_KEY＞
+  method: GET
+  req_body: null
+  uri: https://api.groq.com/openai/v1/models
+  use_dynamic_inputs: false
+  user_property_path: data

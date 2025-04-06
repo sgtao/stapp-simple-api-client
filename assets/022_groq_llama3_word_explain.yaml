@@ -1,0 +1,16 @@
+# groq_llama3_word_explain.yaml
+session_state:
+  header_df:
+  - Property: Content-Type
+    Value: application/json
+  - Property: Authorization
+    Value: Bearer ＜API_KEY＞
+  method: POST
+  req_body: "{\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\"\
+    : \"補足情報を記します。\\n## 用語\\n＜user_input_0＞\\n## 補足情報\\n＜user_input_1＞\"\n    },\n\
+    \    {\n      \"role\": \"user\",\n      \"content\": \"次の用語を解説してください。\\n## 用語\\\
+    n＜user_input_0＞\\n## 方法\\nまず用語の概要を200文字以内で説明したあと、用例を5つ上げて説明してください。\"\n    }\n\
+    \  ],\n  \"model\": \"llama-3.3-70b-versatile\"\n}"
+  uri: https://api.groq.com/openai/v1/chat/completions
+  use_dynamic_inputs: false
+  user_property_path: choices[0].message.content
