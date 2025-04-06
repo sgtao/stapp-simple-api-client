@@ -52,11 +52,29 @@ def main():
     app_logger.app_start()
 
     st.title("Log Viewer")
-    # ログファイルのパス
-    log_file_path = app_logger.get_logfile_name()
+    # ログファイルを選択
+    log_files = app_logger.get_log_filelist()
+    st.session_state.disable_rotate = False
+
+    def _on_change_select():
+        st.session_state.disable_rotate = (
+            selected_log_file != "logs/api_request.log"
+        )
+
+    selected_log_file = st.selectbox(
+        label="Select log file",
+        options=log_files,
+        index=0,
+        on_change=_on_change_select,
+    )
 
     # ログファイルリネームボタン
-    if st.button("Log Rotate"):
+    log_file_path = app_logger.get_logfile_name()
+    if st.button(
+        label="Log Rotate",
+        help="rotate api_request.log file",
+        disabled=st.session_state.disable_rotate,
+    ):
         rotated_filename = rotate_log_file(log_file_path, app_logger)
         if rotate_log_file is not None:
             # app_logger.logger.removeHandler()
@@ -65,7 +83,8 @@ def main():
             app_logger.info_log(f"previous log renamed to {rotated_filename}.")
             st.rerun()
 
-    display_log(log_file_path)
+    # display_log(log_file_path)
+    display_log(selected_log_file)
 
 
 if __name__ == "__main__":

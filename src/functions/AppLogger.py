@@ -19,12 +19,12 @@ class AppLogger:
         self.name = name
         self.log_file = log_file
         self.log_level = level
+        # ログ格納ディレクトリをクラス変数として保持
+        self.log_dirname = LOG_DIR
 
         # ログディレクトリの作成
-        if self.log_file == DEFAULT_LOGFILE_PATH and not os.path.exists(
-            LOG_DIR
-        ):
-            os.makedirs(LOG_DIR)
+        if not os.path.exists(self.log_dirname):
+            os.makedirs(self.log_dirname)
 
         self.logger = logging.getLogger(name)
         self.setup_logger()
@@ -75,3 +75,16 @@ class AppLogger:
 
     def get_logfile_name(self):
         return self.log_file
+
+    def get_log_dir(self):
+        return self.log_dirname
+
+    def get_log_filelist(self):
+        # return self.log_dirname
+        log_files = []
+        for f in os.listdir(self.log_dirname):
+            if os.path.isfile(
+                os.path.join(self.log_dirname, f)
+            ) and f.endswith(".log"):
+                log_files.append(os.path.join(self.log_dirname, f))
+        return log_files
