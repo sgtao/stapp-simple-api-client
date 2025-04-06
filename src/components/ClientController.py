@@ -92,7 +92,8 @@ class ClientController:
 
     # 『読込み』モーダル：
     def _on_file_upload(self):
-        st.session_state.config = None
+        # st.session_state.config = None
+        pass
 
     def _load_config(self, uploaded_yaml):
         """
@@ -162,10 +163,10 @@ class ClientController:
         if "req_body" in cfg_session_state:
             st.session_state.req_body = cfg_session_state.get("req_body")
         if "use_dynamic_inputs" in cfg_session_state:
-            if cfg_session_state.get("use_dynamic_inputs") == "true":
-                st.session_state.use_dynamic_inputs = True
-            else:
+            if cfg_session_state.get("use_dynamic_inputs") == "false":
                 st.session_state.use_dynamic_inputs = False
+            else:
+                st.session_state.use_dynamic_inputs = True
         if "user_property_path" in cfg_session_state:
             st.session_state.user_property_path = cfg_session_state.get(
                 "user_property_path"
@@ -179,11 +180,12 @@ class ClientController:
             on_change=self._on_file_upload,
         )
 
-        if uploaded_file is not None and st.session_state.config is None:
+        # if uploaded_file is not None and st.session_state.config is None:
+        if uploaded_file is not None:
             try:
                 config = self._load_config(uploaded_file)
                 if config:
-                    st.session_state.config = config
+                    # st.session_state.config = config
                     self._set_session_state(config)
                     # main_viewer.config_viewer(st.session_state.config)
                     st.rerun()

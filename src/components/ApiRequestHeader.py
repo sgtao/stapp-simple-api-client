@@ -6,7 +6,13 @@ import streamlit as st
 class ApiRequestHeader:
     def __init__(self):
         # ヘッダー情報の初期化
-        self.header_df = None
+        if "header_df" not in st.session_state:
+            st.session_state.header_df = pd.DataFrame(
+                [
+                    {"Property": "Content-Type", "Value": "application/json"},
+                ]
+            )
+        # self.header_df = None
         if "header_df" in st.session_state:
             self.header_df = st.session_state.header_df
 

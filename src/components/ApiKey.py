@@ -5,6 +5,9 @@ import streamlit as st
 
 class ApiKey:
     def __init__(self):
+        if "api_key" not in st.session_state:
+            st.session_state.api_key = ""
+
         self.api_key = ""
 
         # API-KEYのプリセット確認
