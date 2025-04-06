@@ -6,32 +6,16 @@ import yaml
 
 import streamlit as st
 
-from components.ApiKey import ApiKey
 from components.ApiRequestHeader import ApiRequestHeader
 from components.ApiRequestInputs import ApiRequestInputs
 from components.ApiResponseViewer import ApiResponseViewer
 from components.ClientController import ClientController
-from components.UserInputs import UserInputs
+from components.SideMenus import SideMenus
 from functions.ApiRequestor import ApiRequestor
 from functions.AppLogger import AppLogger
 
 APP_TITLE = "Config Api Client"
 ASSETS_DIR = "assets"
-
-
-def sidebar():
-    # インスタンス化
-    api_key_component = ApiKey()
-    user_inputs_component = UserInputs()
-    client_controller = ClientController()
-
-    with st.sidebar:
-        api_key_component.input_key()
-        user_inputs_component.render_dynamic_inputs()
-        user_inputs_component.render_property_path()
-        with st.expander("session_state", expanded=False):
-            st.write(st.session_state)
-        client_controller.render_buttons()
 
 
 def load_config_from_yaml(file_path):
@@ -119,5 +103,6 @@ def main():
 if __name__ == "__main__":
     app_logger = AppLogger(APP_TITLE)
     app_logger.app_start()
-    sidebar()
+    side_menus = SideMenus()
+    side_menus.render_api_client_menu()
     main()

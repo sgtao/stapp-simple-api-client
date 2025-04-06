@@ -11,6 +11,11 @@ Edit `/src` and `/tests` to customize this app to your heart's desire :heart:.
 st.page_link(
     "pages/11_simple_api_client.py",
     label="Go to simple_api_client App",
+    icon="🧪",
+)
+st.page_link(
+    "pages/12_config_api_client.py",
+    label="Go to config_api_client App",
     icon="🚀",
 )
 # ログ表示ページへのリンク

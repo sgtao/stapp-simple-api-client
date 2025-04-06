@@ -3,12 +3,10 @@ import json
 
 import streamlit as st
 
-from components.ApiKey import ApiKey
 from components.ApiRequestHeader import ApiRequestHeader
 from components.ApiRequestInputs import ApiRequestInputs
 from components.ApiResponseViewer import ApiResponseViewer
-from components.ClientController import ClientController
-from components.UserInputs import UserInputs
+from components.SideMenus import SideMenus
 from functions.ApiRequestor import ApiRequestor
 from functions.AppLogger import AppLogger
 
@@ -16,32 +14,8 @@ from functions.AppLogger import AppLogger
 APP_TITLE = "Simple Api Client"
 
 
-def init_st_session_state():
-    refreshed_state = False
-    if "api_running" not in st.session_state:
-        st.session_state.api_running = False
-        refreshed_state = True
-    if refreshed_state:
-        st.rerun()
-
-
-def sidebar():
-    # インスタンス化
-    api_key_component = ApiKey()
-    user_inputs_component = UserInputs()
-    client_controller = ClientController()
-
-    with st.sidebar:
-        api_key_component.input_key()
-        user_inputs_component.render_dynamic_inputs()
-        user_inputs_component.render_property_path()
-        with st.expander("session_state", expanded=False):
-            st.write(st.session_state)
-        client_controller.render_buttons()
-
-
 def main():
-    st.title(f"🚀 {APP_TITLE}")
+    st.title(f"🧪 {APP_TITLE}")
     """
     任意のAPIサービスにアクセスする[streamlit](https://streamlit.io/)アプリです。
     """
@@ -107,6 +81,6 @@ def main():
 if __name__ == "__main__":
     app_logger = AppLogger(APP_TITLE)
     app_logger.app_start()
-    # init_st_session_state()
-    sidebar()
+    side_menus = SideMenus()
+    side_menus.render_api_client_menu()
     main()
