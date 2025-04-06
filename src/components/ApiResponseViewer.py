@@ -52,6 +52,37 @@ def extract_property_from_json(json_data, property_path):
 
 
 class ApiResponseViewer:
+
+    def render_extracted_value(self, extracted_value):
+        """抽出された値をタブで表示する"""
+        tabs = st.tabs(
+            [
+                "markdown",
+                "text",
+                "json",
+                "code",
+                "html",
+            ]
+        )
+        with tabs[0]:
+            st.markdown(str(extracted_value))
+        with tabs[1]:
+            st.write(extracted_value)
+        with tabs[2]:
+            try:
+                st.json(extracted_value)
+            except Exception as e:
+                st.error(
+                    f"""Exception occured: {e}
+                        JSON形式で表示できませんでした。元の値を表示します:
+                        {extracted_value}
+                    """
+                )
+        with tabs[3]:
+            st.code(extracted_value)
+        with tabs[4]:
+            st.html(extracted_value)
+
     def render_viewer(self, response):
         # st.text(response.status_code)
         st.metric(label="Status Code", value=response.status_code)
@@ -72,7 +103,8 @@ class ApiResponseViewer:
                 # 抽出された値を表示
                 if extracted_value is not None:
                     st.success(f"Extracted Value({property_path}): Found.")
-                    st.markdown(extracted_value)
+                    # st.markdown(extracted_value)
+                    self.render_extracted_value(extracted_value)
                 else:
                     st.warning(f"Extracted Value({property_path}): Not Found!")
 
