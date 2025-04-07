@@ -60,6 +60,8 @@ def main():
         config = load_config_from_yaml(selected_config_file)
         if "title" in config:
             st.info(f"{config.get('title')}")
+        if "note" in config:
+            st.warning(f"{config.get('note')}")
         # st.write("##### Config states")
         with st.expander(
             label="##### Config states",
