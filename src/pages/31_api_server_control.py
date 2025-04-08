@@ -1,11 +1,13 @@
 # api_server_control.py
 # import json
 import os
+import requests
 
 import streamlit as st
 import subprocess
 import signal
 
+from components.ApiResponseViewer import ApiResponseViewer
 from functions.AppLogger import AppLogger
 
 
@@ -16,7 +18,7 @@ st.set_page_config(
 )
 
 APP_TITLE = "API Server Control"
-SUBPROCESS_PROG = "src/functions/api_server.py"
+SUBPROCESS_PROG = "src/services/api_server.py"
 
 
 def initial_session_state():
@@ -80,22 +82,21 @@ def stop_api_server():
         st.warning("API Server is not running.")
 
 
-def test_api_connection(port):
+def test_api_hello(port):
     """
     APIサーバーへの接続をテストします。
     """
-    import requests
-
     url = f"http://localhost:{port}/api/v0/hello"
     try:
-        response = requests.get(url)
-        response.raise_for_status()  # HTTPエラーをチェック
-        st.success(
-            f"""
-            Successfully connected to API Server on port {port}.
-            Response: {response.json()}
-            """
-        )
+        if st.button("Test API (hello)"):
+            response = requests.get(url)
+            response.raise_for_status()  # HTTPエラーをチェック
+            st.success(
+                f"""
+                Successfully connected to API Server on port {port}.
+                """
+            )
+            return response
     except requests.exceptions.RequestException as e:
         st.error(f"Failed to connect to API Server: {e}")
 
@@ -130,8 +131,16 @@ def main():
 
     # API接続テストボタン
     if st.session_state.api_process:
-        if st.button("Test API Connection"):
-            test_api_connection(port)
+        # instantiation
+        response_viewer = ApiResponseViewer("result")
+        response = None
+        try:
+            response = test_api_hello(port)
+            if response:
+                st.subheader("レスポンス")
+                response_viewer.render_viewer(response)
+        except Exception as e:
+            st.error(f"Failed to connect to API Server: {e}")
 
 
 if __name__ == "__main__":

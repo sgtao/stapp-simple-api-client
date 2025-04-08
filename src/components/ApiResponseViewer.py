@@ -52,8 +52,12 @@ def extract_property_from_json(json_data, property_path):
 
 
 class ApiResponseViewer:
-    def __init__(self):
-        pass
+    def __init__(self, response_path=None):
+        if "user_property_path" not in st.session_state:
+            if response_path:
+                st.session_state.user_property_path = response_path
+            else:
+                st.session_state.user_property_path = ""
 
     def response_content(self, response):
         content_type = response.headers.get("Content-Type", "")
