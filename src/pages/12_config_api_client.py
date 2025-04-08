@@ -1,8 +1,5 @@
 # config_api_client.py
 import json
-import os
-import glob
-import yaml
 
 import streamlit as st
 
@@ -10,18 +7,12 @@ from components.ApiRequestHeader import ApiRequestHeader
 from components.ApiRequestInputs import ApiRequestInputs
 from components.ApiResponseViewer import ApiResponseViewer
 from components.ClientController import ClientController
+from components.ConfigFiles import ConfigFiles
 from components.SideMenus import SideMenus
 from functions.ApiRequestor import ApiRequestor
 from functions.AppLogger import AppLogger
 
 APP_TITLE = "Config Api Client"
-ASSETS_DIR = "assets"
-APPEND_DIR = "privates"
-
-
-def load_config_from_yaml(file_path):
-    with open(file_path, "r") as f:
-        return yaml.safe_load(f)
 
 
 def apply_config_to_session_state(config):
@@ -42,34 +33,22 @@ def main():
     api_requestor = ApiRequestor()
     client_controller = ClientController()
 
-    # assetsフォルダからyamlファイルを選択
-    config_files = glob.glob(os.path.join(ASSETS_DIR, "*.yaml"))
-    for private_config in glob.glob(os.path.join(APPEND_DIR, "*.yaml")):
-        config_files.append(private_config)
+    # assets/privatesフォルダからyamlファイルを選択
+    config_files = ConfigFiles()
 
     if not config_files:
         st.warning(
-            f"No YAML config files found in '{ASSETS_DIR}'. Please add some."
+            "No YAML config files in assets and private. Please add some."
         )
         return
 
-    selected_config_file = st.selectbox("Select a config file", config_files)
+    # selected_config_file = st.selectbox("Select a config file", config_files)
+    selected_config_file = config_files.render_config_selector()
 
     # 選択されたコンフィグファイルを読み込む
     if selected_config_file:
-        config = load_config_from_yaml(selected_config_file)
-        if "title" in config:
-            st.info(f"{config.get('title')}")
-        if "note" in config:
-            st.warning(f"{config.get('note')}")
-        # st.write("##### Config states")
-        with st.expander(
-            label="##### Config states",
-            expanded=False,
-            icon="📝",
-        ):
-            st.code(selected_config_file)
-            st.write(config)
+        config = config_files.load_config_from_yaml(selected_config_file)
+        config_files.render_config_viewer(selected_config_file, config)
 
         # 読み込んだコンフィグをセッションステートに適用
         # apply_config_to_session_state(config)
