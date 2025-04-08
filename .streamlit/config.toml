@@ -14,19 +14,5 @@ font="sans serif"
 [browser]
 gatherUsageStats = false
 
-[ui]
-hideSidebarNav = false
-
 [runner]
 fastReruns = true
-
-[pages]
-  [pages."11_simple_api_client.py"]
-    title = "Simple API Client"
-    icon = "🧪"
-  [pages."12_config_api_client.py"]
-    title = "API Server Control"
-    icon = "⚙️"
-  [pages."21_logs_viewer.py"]
-    title = "Logs Viewer"
-    icon = ""
