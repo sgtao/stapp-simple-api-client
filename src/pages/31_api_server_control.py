@@ -18,7 +18,8 @@ st.set_page_config(
 )
 
 APP_TITLE = "API Server Control"
-SUBPROCESS_PROG = "src/services/api_server.py"
+# SUBPROCESS_PROG = "src/services/api_server.py"
+SUBPROCESS_PROG = "src/api_server.py"
 
 
 def initial_session_state():
@@ -27,6 +28,8 @@ def initial_session_state():
         st.session_state.api_process = None
     if "port_number" not in st.session_state:
         st.session_state.port_number = 3000
+    if "response" not in st.session_state:
+        st.session_state.response = None
 
 
 def start_api_server(port):
@@ -101,6 +104,26 @@ def test_api_hello(port):
         st.error(f"Failed to connect to API Server: {e}")
 
 
+def test_get_config_files(port):
+    """
+    APIサーバーへの接続をテストします。
+    """
+    # url = f"http://localhost:{port}/api/v0/service/configs"
+    url = f"http://localhost:{port}/api/v0/configs"
+    try:
+        if st.button("Test Configs(get list)"):
+            response = requests.get(url)
+            response.raise_for_status()  # HTTPエラーをチェック
+            st.success(
+                f"""
+                Successfully connected to API Server on port {port}.
+                """
+            )
+            return response
+    except requests.exceptions.RequestException as e:
+        st.error(f"Failed to connect to API Server: {e}")
+
+
 def main():
     # UI
     st.title(f"⚙️ {APP_TITLE}")
@@ -133,12 +156,26 @@ def main():
     if st.session_state.api_process:
         # instantiation
         response_viewer = ApiResponseViewer("result")
-        response = None
         try:
-            response = test_api_hello(port)
-            if response:
-                st.subheader("レスポンス")
+            st.subheader("Test API Server")
+            col1, col2 = st.columns(2)
+            response = None
+            with col1:
+                if response is None:
+                    response = test_api_hello(port)
+                if response is None:
+                    st.session_state.response = test_get_config_files(port)
+            with col2:
+                if st.button("Session Rerun", icon="🔃"):
+                    st.rerun()
+
+            # if st.session_state.response:
+            st.subheader("レスポンス")
+            if response is not None:
                 response_viewer.render_viewer(response)
+                st.session_state.response = response
+            else:
+                response_viewer.render_viewer(st.session_state.response)
         except Exception as e:
             st.error(f"Failed to connect to API Server: {e}")
 
