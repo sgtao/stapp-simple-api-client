@@ -172,19 +172,15 @@ def main():
 
             # if st.session_state.response:
             st.subheader("レスポンス")
-            # # if response is not None:
-            # if "status_code" in response:
-            #     response_viewer.render_viewer(response)
-            #     st.session_state.response = response
-            # elif "status_code" in st.session_state.response:
-            #     response_viewer.render_viewer(st.session_state.response)
-            # else:
-            #     st.info("Click above Test Buttons, after start server.")
+            # st.write(response)
+            # st.write(st.session_state.response)
             if response is not None:
                 response_viewer.render_viewer(response)
                 st.session_state.response = response
-            else:
+            elif st.session_state.response is not None:
                 response_viewer.render_viewer(st.session_state.response)
+            else:
+                st.info("You can access to API Server via Test Buttons")
 
         except Exception as e:
             st.error(f"Failed to connect to API Server: {e}")
