@@ -141,14 +141,15 @@ def main():
     cols = st.columns(2)
     with cols[0]:
         if st.button(
-            "Run API Service",
+            label="Run API Service",
             disabled=(st.session_state.api_process is not None),
         ):
             start_api_server(port)
     with cols[1]:
         if st.button(
-            "Stop API Service",
+            label="Stop API Service",
             disabled=(st.session_state.api_process is None),
+            help="Click twice is better.",
         ):
             stop_api_server()
 
@@ -171,11 +172,20 @@ def main():
 
             # if st.session_state.response:
             st.subheader("レスポンス")
+            # # if response is not None:
+            # if "status_code" in response:
+            #     response_viewer.render_viewer(response)
+            #     st.session_state.response = response
+            # elif "status_code" in st.session_state.response:
+            #     response_viewer.render_viewer(st.session_state.response)
+            # else:
+            #     st.info("Click above Test Buttons, after start server.")
             if response is not None:
                 response_viewer.render_viewer(response)
                 st.session_state.response = response
             else:
                 response_viewer.render_viewer(st.session_state.response)
+
         except Exception as e:
             st.error(f"Failed to connect to API Server: {e}")
 

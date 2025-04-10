@@ -80,6 +80,18 @@ class ApiResponseViewer:
                     f"レスポンスヘッダーの表示中にエラーが発生しました: {str(e)}"
                 )
 
+    def body_viewer(self, content_type, response):
+        with st.expander("レスポンスボディ"):
+            try:
+                if content_type == "application/json":
+                    # JSON形式の場合
+                    st.json(response.json())
+                else:
+                    # Text / HTML の場合
+                    st.markdown(response.text)
+            except json.JSONDecodeError:
+                st.text(response.text)  # テキスト形式の場合
+
     def render_extracted_value(self, extracted_value):
         """抽出された値をタブで表示する"""
         tabs = st.tabs(
@@ -111,11 +123,11 @@ class ApiResponseViewer:
             st.html(extracted_value)
 
     def render_viewer(self, response):
-        # st.text(response.status_code)
-        st.metric(label="Status Code", value=response.status_code)
-        content_type = self.response_content(response)
-        if st.session_state.user_property_path != "":
-            try:
+        try:
+            # st.text(response.status_code)
+            st.metric(label="Status Code", value=response.status_code)
+            content_type = self.response_content(response)
+            if st.session_state.user_property_path != "":
                 # 抽出したいプロパティの指定
                 property_path = st.session_state.user_property_path
 
@@ -136,20 +148,11 @@ class ApiResponseViewer:
                 else:
                     st.warning(f"Extracted Value({property_path}): Not Found!")
 
-            except json.JSONDecodeError:
-                st.text(response.text)  # テキスト形式の場合
-            except TypeError:
-                st.error("プロパティの型が想定と異なります。")
+            if "header" in response:
+                self.header_viewer(response)
+                self.body_viewer(content_type, response)
 
-        # レスポンスの表示
-        self.header_viewer(response)
-        with st.expander("レスポンスボディ"):
-            try:
-                if content_type == "application/json":
-                    # JSON形式の場合
-                    st.json(response.json())
-                else:
-                    # Text / HTML の場合
-                    st.markdown(response.text)
-            except json.JSONDecodeError:
-                st.text(response.text)  # テキスト形式の場合
+        except json.JSONDecodeError:
+            st.text(response.text)  # テキスト形式の場合
+        except TypeError:
+            st.error("プロパティの型が想定と異なります。")
