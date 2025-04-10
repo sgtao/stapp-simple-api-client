@@ -21,3 +21,7 @@ class SideMenus:
             with st.expander("session_state", expanded=False):
                 st.write(st.session_state)
             self.client_controller.render_buttons()
+
+    def set_user_property_path(self, response_path):
+        # st.session_state.user_property_path = response_path
+        self.user_inputs_component.set_user_property_path(response_path)

@@ -24,6 +24,10 @@ class UserInputs:
             value=self.user_property_path,
         )
 
+    def set_user_property_path(self, user_property_path):
+        self.user_property_path = user_property_path
+        st.session_state.user_property_path = user_property_path
+
     def render_dynamic_inputs(self):
         st.session_state.num_inputs = st.number_input(
             "Request 入力指定数", min_value=1, max_value=10, value=1, step=1

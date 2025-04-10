@@ -7,7 +7,9 @@ import streamlit as st
 import subprocess
 import signal
 
+from components.SideMenus import SideMenus
 from components.ApiResponseViewer import ApiResponseViewer
+from functions.ApiRequestor import ApiRequestor
 from functions.AppLogger import AppLogger
 
 
@@ -89,10 +91,20 @@ def test_api_hello(port):
     """
     APIサーバーへの接続をテストします。
     """
-    url = f"http://localhost:{port}/api/v0/hello"
+    uri = f"http://localhost:{port}/api/v0/hello"
+    method = "GET"
+    header_dict = {
+        "Content-Type": "application/json",
+    }
     try:
         if st.button("Test API (hello)"):
-            response = requests.get(url)
+            # response = requests.get(uri)
+            api_requestor = ApiRequestor()
+            response = api_requestor.send_request(
+                uri,
+                method,
+                header_dict,
+            )
             response.raise_for_status()  # HTTPエラーをチェック
             st.success(
                 f"""
@@ -108,11 +120,20 @@ def test_get_config_files(port):
     """
     APIサーバーへの接続をテストします。
     """
-    # url = f"http://localhost:{port}/api/v0/service/configs"
-    url = f"http://localhost:{port}/api/v0/configs"
+    uri = f"http://localhost:{port}/api/v0/configs"
+    method = "GET"
+    header_dict = {
+        "Content-Type": "application/json",
+    }
     try:
         if st.button("Test Configs(get list)"):
-            response = requests.get(url)
+            # response = requests.get(uri)
+            api_requestor = ApiRequestor()
+            response = api_requestor.send_request(
+                uri,
+                method,
+                header_dict,
+            )
             response.raise_for_status()  # HTTPエラーをチェック
             st.success(
                 f"""
@@ -167,10 +188,9 @@ def main():
                 if response is None:
                     st.session_state.response = test_get_config_files(port)
             with col2:
-                if st.button("Session Rerun", icon="🔃"):
+                if st.button("Session Rerun (`R`)", icon="🔃"):
                     st.rerun()
 
-            # if st.session_state.response:
             st.subheader("レスポンス")
             # st.write(response)
             # st.write(st.session_state.response)
@@ -190,4 +210,7 @@ if __name__ == "__main__":
     app_logger = AppLogger(APP_TITLE)
     app_logger.app_start()
     initial_session_state()
+    side_menus = SideMenus()
+    side_menus.set_user_property_path("result")
+    side_menus.render_api_client_menu()
     main()
