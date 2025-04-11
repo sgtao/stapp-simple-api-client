@@ -61,6 +61,7 @@ class ApiRequestor:
             if hasattr(http_err.response, "status_code"):
                 st.error(f"ステータスコード: {http_err.response.status_code}")
                 st.error(f"理由: {http_err.response.reason}")
+                st.error(f"詳細: {http_err.response.json()}")
             return None
 
         except requests.exceptions.RequestException as req_err:

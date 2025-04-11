@@ -1,5 +1,5 @@
 # api_server_control.py
-# import json
+import json
 import os
 import requests
 
@@ -145,6 +145,42 @@ def test_get_config_files(port):
         st.error(f"Failed to connect to API Server: {e}")
 
 
+def test_post_service(port):
+    """
+    APIサーバーへの接続をテストします。
+    """
+    uri = f"http://localhost:{port}/api/v0/service"
+    method = "POST"
+    header_dict = {"Content-Type": "application/json"}
+    # リクエストボディ入力（POST, PUTの場合のみ表示）
+    request_body = """
+        {
+            "config_file": "assets/001_get_simple_api_test.yaml"
+        }
+    """
+    body_json = json.loads(request_body)
+
+    try:
+        if st.button("Test Service(post config)"):
+            # response = requests.get(uri)
+            api_requestor = ApiRequestor()
+            response = api_requestor.send_request(
+                uri,
+                method,
+                header_dict,
+                body_json,
+            )
+            response.raise_for_status()  # HTTPエラーをチェック
+            st.success(
+                f"""
+                Successfully connected to API Server on port {port}.
+                """
+            )
+            return response
+    except requests.exceptions.RequestException as e:
+        st.error(f"Failed to connect to API Server: {e}")
+
+
 def main():
     # UI
     st.title(f"⚙️ {APP_TITLE}")
@@ -187,6 +223,8 @@ def main():
                     response = test_api_hello(port)
                 if response is None:
                     st.session_state.response = test_get_config_files(port)
+                if response is None:
+                    st.session_state.response = test_post_service(port)
             with col2:
                 if st.button("Session Rerun (`R`)", icon="🔃"):
                     st.rerun()
