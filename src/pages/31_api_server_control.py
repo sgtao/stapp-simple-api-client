@@ -168,7 +168,7 @@ def modal_post_service(port, config_files):
                 st.success("POSTに成功しました")
                 st.session_state.response = response
                 st.info("モーダルを閉じます...")
-                time.sleep(1)
+                time.sleep(3)
                 st.rerun()
             except Exception as e:
                 st.error(f"Failed to `POST` to API Server: {e}")
@@ -246,7 +246,8 @@ def test_post_service(port, config_file="assets/001_get_simple_api_test.yaml"):
         )
         return response
     except requests.exceptions.RequestException as e:
-        st.error(f"Failed to `POST` to API Server: {e}")
+        # st.error(f"Failed to `POST` to API Server: {e}")
+        raise e
 
 
 def main():
