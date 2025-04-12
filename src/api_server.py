@@ -13,7 +13,7 @@ import requests
 
 # from src.components.ConfigFiles import ConfigFiles
 from components.ConfigFiles import ConfigFiles
-from components.ApiResponseViewer import extract_property_from_json
+from components.ResponseViewer import extract_property_from_json
 
 app = FastAPI()
 

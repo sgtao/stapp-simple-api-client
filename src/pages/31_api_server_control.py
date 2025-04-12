@@ -8,7 +8,7 @@ import subprocess
 import signal
 
 from components.SideMenus import SideMenus
-from components.ApiResponseViewer import ApiResponseViewer
+from components.ResponseViewer import ResponseViewer
 from functions.ApiRequestor import ApiRequestor
 from functions.AppLogger import AppLogger
 
@@ -140,6 +140,7 @@ def test_get_config_files(port):
                 Successfully connected to API Server on port {port}.
                 """
             )
+            # st.write(response.json())
             return response
     except requests.exceptions.RequestException as e:
         st.error(f"Failed to connect to API Server: {e}")
@@ -213,7 +214,7 @@ def main():
     # API接続テストボタン
     if st.session_state.api_process:
         # instantiation
-        response_viewer = ApiResponseViewer("result")
+        response_viewer = ResponseViewer("result")
         try:
             st.subheader("Test API Server")
             col1, col2 = st.columns(2)
@@ -222,9 +223,9 @@ def main():
                 if response is None:
                     response = test_api_hello(port)
                 if response is None:
-                    st.session_state.response = test_get_config_files(port)
+                    response = test_get_config_files(port)
                 if response is None:
-                    st.session_state.response = test_post_service(port)
+                    response = test_post_service(port)
             with col2:
                 if st.button("Session Rerun (`R`)", icon="🔃"):
                     st.rerun()

@@ -1,4 +1,4 @@
-# ApiResponseViewer.py
+# ResponseViewer.py
 import json
 
 import streamlit as st
@@ -51,7 +51,7 @@ def extract_property_from_json(json_data, property_path):
         return None
 
 
-class ApiResponseViewer:
+class ResponseViewer:
     def __init__(self, response_path=None):
         if "user_property_path" not in st.session_state:
             if response_path:
@@ -127,6 +127,12 @@ class ApiResponseViewer:
             # st.text(response.status_code)
             st.metric(label="Status Code", value=response.status_code)
             content_type = self.response_content(response)
+            # if "headers" in response:
+            #     self.header_viewer(response)
+            #     self.body_viewer(content_type, response)
+            self.header_viewer(response)
+            self.body_viewer(content_type, response)
+
             if st.session_state.user_property_path != "":
                 # 抽出したいプロパティの指定
                 property_path = st.session_state.user_property_path
@@ -147,10 +153,6 @@ class ApiResponseViewer:
                     self.render_extracted_value(extracted_value)
                 else:
                     st.warning(f"Extracted Value({property_path}): Not Found!")
-
-            if "header" in response:
-                self.header_viewer(response)
-                self.body_viewer(content_type, response)
 
         except json.JSONDecodeError:
             st.text(response.text)  # テキスト形式の場合

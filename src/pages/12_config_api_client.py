@@ -5,7 +5,7 @@ import streamlit as st
 
 from components.ApiRequestHeader import ApiRequestHeader
 from components.ApiRequestInputs import ApiRequestInputs
-from components.ApiResponseViewer import ApiResponseViewer
+from components.ResponseViewer import ResponseViewer
 from components.ClientController import ClientController
 from components.ConfigFiles import ConfigFiles
 from components.SideMenus import SideMenus
@@ -29,7 +29,7 @@ def main():
     # 以下は11_simple_api_client.pyと同様のAPIリクエスト部分
     request_header = ApiRequestHeader()
     request_inputs = ApiRequestInputs()
-    response_viewer = ApiResponseViewer()
+    response_viewer = ResponseViewer()
     api_requestor = ApiRequestor()
     client_controller = ClientController()
 

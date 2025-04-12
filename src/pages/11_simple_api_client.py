@@ -5,7 +5,7 @@ import streamlit as st
 
 from components.ApiRequestHeader import ApiRequestHeader
 from components.ApiRequestInputs import ApiRequestInputs
-from components.ApiResponseViewer import ApiResponseViewer
+from components.ResponseViewer import ResponseViewer
 from components.SideMenus import SideMenus
 from functions.ApiRequestor import ApiRequestor
 from functions.AppLogger import AppLogger
@@ -22,7 +22,7 @@ def main():
     # インスタンス化
     request_header = ApiRequestHeader()
     request_inputs = ApiRequestInputs()
-    response_viewer = ApiResponseViewer()
+    response_viewer = ResponseViewer()
     api_requestor = ApiRequestor()
 
     # ユーザー入力：APIリクエストの指定項目
