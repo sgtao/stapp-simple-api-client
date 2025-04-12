@@ -2,6 +2,7 @@
 # import json
 import os
 import requests
+import time
 
 import streamlit as st
 import subprocess
@@ -32,6 +33,10 @@ def initial_session_state():
         st.session_state.port_number = 3000
     if "response" not in st.session_state:
         st.session_state.response = None
+    if "config_files" not in st.session_state:
+        st.session_state.config_files = []
+    if "selected_config" not in st.session_state:
+        st.session_state.selected_config = ""
 
 
 def start_api_server(port):
@@ -141,14 +146,59 @@ def test_get_config_files(port):
                 """
             )
             # st.write(response.json())
-            # response_json = response.json()
-            # st.session_state.config_files = response_json.get("result")
+            response_json = response.json()
+            st.session_state.config_files = response_json.get("result")
             return response
     except requests.exceptions.RequestException as e:
         st.error(f"Failed to connect to API Server: {e}")
 
 
-def test_post_service(port):
+@st.dialog("Setting Info.")
+def modal_post_service(port, config_files):
+    st.write("Modal for POST service:")
+    if len(config_files):
+        st.info("Select Config file and Click `POST`.")
+        config_file = render_config_selector(config_files)
+        if st.button(label="POST", icon="🚀"):
+            try:
+                response = test_post_service(
+                    port=port, config_file=config_file
+                )
+                # if response:
+                st.success("POSTに成功しました")
+                st.session_state.response = response
+                st.info("モーダルを閉じます...")
+                time.sleep(1)
+                st.rerun()
+            except Exception as e:
+                st.error(f"Failed to `POST` to API Server: {e}")
+    else:
+        st.warning("At 1st, Click `Test Configs`.")
+    _modal_closer()
+
+
+def _update_selected_config():
+    st.session_state.selected_config = st.session_state._config_selector
+
+
+def render_config_selector(config_files):
+    return st.selectbox(
+        label="HTTPメソッド",
+        options=config_files,
+        index=0,
+        key="_config_selector",
+        on_change=_update_selected_config,
+    )
+
+
+def _modal_closer():
+    if st.button(label="Close Modal"):
+        st.info("モーダルを閉じます...")
+        time.sleep(1)
+        st.rerun()
+
+
+def test_post_service(port, config_file="assets/001_get_simple_api_test.yaml"):
     """
     APIサーバーへの接続をテストします。
     """
@@ -162,7 +212,7 @@ def test_post_service(port):
     #     }
     # """
     request_body = {
-        "config_file": "assets/001_get_simple_api_test.yaml",
+        "config_file": config_file,
         "num_user_inputs": st.session_state.num_inputs,
         "user_inputs": {},
     }
@@ -180,24 +230,23 @@ def test_post_service(port):
     body_json = request_body
 
     try:
-        if st.button("Test Service(post config)"):
-            # response = requests.get(uri)
-            api_requestor = ApiRequestor()
-            response = api_requestor.send_request(
-                uri,
-                method,
-                header_dict,
-                body_json,
-            )
-            response.raise_for_status()  # HTTPエラーをチェック
-            st.success(
-                f"""
-                Successfully connected to API Server on port {port}.
-                """
-            )
-            return response
+        # response = requests.get(uri)
+        api_requestor = ApiRequestor()
+        response = api_requestor.send_request(
+            uri,
+            method,
+            header_dict,
+            body_json,
+        )
+        response.raise_for_status()  # HTTPエラーをチェック
+        st.success(
+            f"""
+            Successfully connected to API Server on port {port}.
+            """
+        )
+        return response
     except requests.exceptions.RequestException as e:
-        st.error(f"Failed to connect to API Server: {e}")
+        st.error(f"Failed to `POST` to API Server: {e}")
 
 
 def main():
@@ -243,7 +292,12 @@ def main():
                 if response is None:
                     response = test_get_config_files(port)
                 if response is None:
-                    response = test_post_service(port)
+                    if st.button("Test Service(post config)"):
+                        # response = test_post_service(port)
+                        modal_post_service(
+                            port=port,
+                            config_files=st.session_state.config_files,
+                        )
             with col2:
                 if st.button("Rerun (`R`)", icon="🏃"):
                     st.rerun()
