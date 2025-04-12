@@ -78,6 +78,7 @@ async def execute_service(request: Request):
         )
 
     # 1. config_file の取得とYAML読み込み
+    print(body_data)
     config_file_path = body_data.get("config_file")
     if not config_file_path:
         raise HTTPException(

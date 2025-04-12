@@ -1,5 +1,5 @@
 # api_server_control.py
-import json
+# import json
 import os
 import requests
 
@@ -141,6 +141,8 @@ def test_get_config_files(port):
                 """
             )
             # st.write(response.json())
+            # response_json = response.json()
+            # st.session_state.config_files = response_json.get("result")
             return response
     except requests.exceptions.RequestException as e:
         st.error(f"Failed to connect to API Server: {e}")
@@ -154,12 +156,28 @@ def test_post_service(port):
     method = "POST"
     header_dict = {"Content-Type": "application/json"}
     # リクエストボディ入力（POST, PUTの場合のみ表示）
-    request_body = """
-        {
-            "config_file": "assets/001_get_simple_api_test.yaml"
-        }
-    """
-    body_json = json.loads(request_body)
+    # request_body = """
+    #     {
+    #         "config_file": "assets/001_get_simple_api_test.yaml"
+    #     }
+    # """
+    request_body = {
+        "config_file": "assets/001_get_simple_api_test.yaml",
+        "num_user_inputs": st.session_state.num_inputs,
+        "user_inputs": {},
+    }
+    for i in range(st.session_state.num_inputs):
+        user_key = f"user_input_{i}"
+        # value = st.session_state[f"user_input_{i}"].replace('"', "'")
+        # request_body["user_inputs"].append({{user_key: f"{value}"}})
+        if user_key in st.session_state:
+            value = st.session_state[user_key]
+            request_body["user_inputs"][user_key] = value
+        else:
+            st.warning(f"Session state key '{user_key}' not found.")
+    # body_json = json.loads(request_body)
+    # body_json = json.dumps(request_body)
+    body_json = request_body
 
     try:
         if st.button("Test Service(post config)"):
