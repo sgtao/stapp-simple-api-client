@@ -245,7 +245,7 @@ def main():
                 if response is None:
                     response = test_post_service(port)
             with col2:
-                if st.button("Session Rerun (`R`)", icon="🔃"):
+                if st.button("Rerun (`R`)", icon="🏃"):
                     st.rerun()
 
             st.subheader("レスポンス")

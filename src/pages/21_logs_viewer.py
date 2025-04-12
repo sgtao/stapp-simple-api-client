@@ -70,17 +70,25 @@ def main():
 
     # ログファイルリネームボタン
     log_file_path = app_logger.get_logfile_name()
-    if st.button(
-        label="Log Rotate",
-        help="rotate api_request.log file",
-        disabled=st.session_state.disable_rotate,
-    ):
-        rotated_filename = rotate_log_file(log_file_path, app_logger)
-        if rotate_log_file is not None:
-            # app_logger.logger.removeHandler()
-            # app_logger.setup_logger(APP_TITLE)
-            app_logger = AppLogger(APP_TITLE)
-            app_logger.info_log(f"previous log renamed to {rotated_filename}.")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button(
+            label="Log Rotate",
+            help="rotate api_request.log file",
+            disabled=st.session_state.disable_rotate,
+            icon="🔃",
+        ):
+            rotated_filename = rotate_log_file(log_file_path, app_logger)
+            if rotate_log_file is not None:
+                # app_logger.logger.removeHandler()
+                # app_logger.setup_logger(APP_TITLE)
+                app_logger = AppLogger(APP_TITLE)
+                app_logger.info_log(
+                    f"previous log renamed to {rotated_filename}."
+                )
+                st.rerun()
+    with col2:
+        if st.button("Rerun (`R`)", icon="🏃"):
             st.rerun()
 
     # display_log(log_file_path)
