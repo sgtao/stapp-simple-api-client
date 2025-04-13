@@ -73,6 +73,10 @@ class AppLogger:
         # 任意タイミングのログ
         self.logger.info(message)
 
+    def debug_log(self, message):
+        # 任意タイミングのログ
+        self.logger.debug(message)
+
     def get_logfile_name(self):
         return self.log_file
 
