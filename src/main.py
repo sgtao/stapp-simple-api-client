@@ -1,9 +1,9 @@
 import streamlit as st
 
 """
-# Welcome to Streamlit!
+## Welcome to simple-api-client App!
 
-Edit `/src` and `/tests` to customize this app to your heart's desire :heart:.
+任意のAPIサービスにアクセスする[streamlit](https://streamlit.io/)アプリです。
 """
 
 # サイドバーのページに移動
@@ -20,3 +20,10 @@ st.page_link(
 )
 # ログ表示ページへのリンク
 st.page_link("pages/21_logs_viewer.py", label="View Logs", icon="📄")
+
+# API Serverページへのリンク
+st.page_link(
+    "pages/31_api_server_control.py",
+    label="Use config_api_client like api server",
+    icon="⚙️",
+)

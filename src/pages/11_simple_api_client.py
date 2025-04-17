@@ -16,9 +16,6 @@ APP_TITLE = "Simple Api Client"
 
 def main():
     st.title(f"🧪 {APP_TITLE}")
-    """
-    任意のAPIサービスにアクセスする[streamlit](https://streamlit.io/)アプリです。
-    """
     # インスタンス化
     request_header = ApiRequestHeader()
     request_inputs = ApiRequestInputs()
