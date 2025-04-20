@@ -1,0 +1,26 @@
+# groq_llama3_tool_use_sample.yaml
+title: Grop API（llama3.3）で`tools`プロパティ利用例
+note: ユーザー入力 `user_input_0` に県名・市名を入力してください（i.e. Tokyo）
+session_state:
+  header_df:
+  - Property: Content-Type
+    Value: application/json
+  - Property: Authorization
+    Value: Bearer ＜API_KEY＞
+  method: POST
+  req_body: "{\n\t\"model\": \"llama-3.3-70b-versatile\",\n\t\"messages\": [\n\t\t\
+    {\n\t\t\t\"role\": \"user\",\n\t\t\t\"content\": \"What'''s the weather like in\
+    \ ＜user_input_0＞?\"\n\t\t}\n\t],\n\t\"tools\": [\n\t\t{\n\t\t\t\"type\": \"function\"\
+    ,\n\t\t\t\"function\": {\n\t\t\t\t\"name\": \"get_current_weather\",\n\t\t\t\t\
+    \"description\": \"Get the current weather in a given location\",\n\t\t\t\t\"\
+    parameters\": {\n\t\t\t\t\t\"type\": \"object\",\n\t\t\t\t\t\"properties\": {\n\
+    \t\t\t\t\t\t\"location\": {\n\t\t\t\t\t\t\t\"type\": \"string\",\n\t\t\t\t\t\t\
+    \t\"description\": \"The city and state, e.g. San Francisco, CA\"\n\t\t\t\t\t\t\
+    },\n\t\t\t\t\t\t\"unit\": {\n\t\t\t\t\t\t\t\"type\": \"string\",\n\t\t\t\t\t\t\
+    \t\"enum\": [\n\t\t\t\t\t\t\t\t\"celsius\",\n\t\t\t\t\t\t\t\t\"fahrenheit\"\n\t\
+    \t\t\t\t\t\t]\n\t\t\t\t\t\t}\n\t\t\t\t\t},\n\t\t\t\t\t\"required\": [\n\t\t\t\t\
+    \t\t\"location\"\n\t\t\t\t\t]\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t],\n\t\"tool_choice\"\
+    : \"auto\"\n}"
+  uri: https://api.groq.com/openai/v1/chat/completions
+  use_dynamic_inputs: true
+  user_property_path: choices[0].message.tool_calls
