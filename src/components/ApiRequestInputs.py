@@ -50,11 +50,12 @@ class ApiRequestInputs:
         )
 
     def render_body_input(self):
+        ext_url = "https://tools.m-bsys.com/dev_tools/json-beautifier.php"
         # リクエストボディ入力（POST, PUTの場合のみ表示）
         if st.session_state.method in ["POST", "PUT"]:
             with st.expander("リクエストボディ設定"):
                 return st.text_area(
-                    label="リクエストボディ (JSON形式)",
+                    label=f"JSON形式で入力 (ツール：[JSONきれい]({ext_url}))",
                     key="_body_input",
                     value=st.session_state.req_body,
                     on_change=self._update_req_body,
