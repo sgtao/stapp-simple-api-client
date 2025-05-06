@@ -59,6 +59,7 @@ class ApiRequestInputs:
                     key="_body_input",
                     value=st.session_state.req_body,
                     on_change=self._update_req_body,
+                    height=200,
                 )
         else:
             return None
