@@ -1,6 +1,9 @@
 # groq_llama3_tool_use_sample.yaml
-title: Grop API（llama3.3）で`tools`プロパティ利用例
-note: ユーザー入力 `user_input_0` に県名・市名を入力してください（i.e. Tokyo）
+title: groq_llama3_tool_use_sample
+note: \
+  Grop API（llama3.3）で`tools`プロパティ利用例
+  - ユーザー入力 `user_input_0` に県名・市名を入力してください
+  - (i.e. Tokyo)
 session_state:
   header_df:
   - Property: Content-Type
