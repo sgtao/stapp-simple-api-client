@@ -16,6 +16,11 @@ def extract_property_from_json(json_data, property_path):
         any: プロパティパスに対応する値。エラーが発生した場合はNone
     """
     try:
+        # print(f"Extracting property: {property_path}")
+        if property_path == ".":
+            # プロパティパスが "." の場合は全てのプロパティを返す
+            return json_data
+
         # プロパティパスを分割し、各キーを順番に辿る
         keys = property_path.split(".")
         value = json_data
