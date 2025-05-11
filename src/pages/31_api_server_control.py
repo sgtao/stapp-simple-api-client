@@ -153,6 +153,39 @@ def test_get_config_files(port):
         st.error(f"Failed to connect to API Server: {e}")
 
 
+def test_config_title(port, config_file="assets/001_get_simple_api_test.yaml"):
+    """
+    APIサーバーへの接続をテストします。
+    """
+    uri = f"http://localhost:{port}/api/v0/config-title"
+    method = "POST"
+    header_dict = {"Content-Type": "application/json"}
+    # リクエストボディ入力（POST, PUTの場合のみ表示）
+    # request_body = """
+    #     {
+    #         "config_file": "assets/001_get_simple_api_test.yaml"
+    #     }
+    # """
+    request_body = {
+        "config_file": config_file,
+    }
+    try:
+        # response = requests.get(uri)
+        api_requestor = ApiRequestor()
+        response = api_requestor.send_request(
+            uri,
+            method,
+            header_dict,
+            request_body,
+        )
+        response.raise_for_status()  # HTTPエラーをチェック
+        return response
+    except requests.exceptions.RequestException as e:
+        # st.error(f"Failed to `POST` to API Server: {e}")
+        raise e
+
+
+# モーダルの定義
 @st.dialog("Setting Info.")
 def modal_post_service(port, config_files):
     st.write("Modal for POST service:")
@@ -161,6 +194,14 @@ def modal_post_service(port, config_files):
         config_file = render_config_selector(config_files)
         if st.button(label="POST", icon="🚀"):
             try:
+                # Config File 情報を取得
+                config_title = test_config_title(
+                    port=port, config_file=config_file
+                )
+                if "result" in config_title:
+                    st.info(f"Run Config: {config_title["result"]}")
+
+                # POST リクエストを送信
                 response = test_post_service(
                     port=port, config_file=config_file
                 )

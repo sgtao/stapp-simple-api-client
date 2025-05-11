@@ -23,28 +23,6 @@ app = FastAPI()
 APP_NAME = "api_server"
 
 
-@app.get("/api/v0/hello")
-@app.post("/api/v0/hello")
-async def hello():
-    """
-    GETとPOSTメソッドで`/api/v0/hello`エンドポイントにアクセスすると、
-    JSON形式で`{"result": "hello"}`を返します。
-    """
-    return {"result": "hello"}
-
-
-# @app.get("/api/v0/service/configs")
-@app.get("/api/v0/configs")
-async def configs():
-    """
-    JSON形式で`{"result": [config_files]}`を返します。
-    """
-    # assets/privatesフォルダからyamlファイルを選択
-    config_files = ConfigFiles()
-    config_files_list = config_files.get_config_files_list()
-    return {"result": config_files_list}
-
-
 def read_yaml_file(file_path):
     """YAMLファイルの内容を読み込みます。"""
     try:
@@ -77,6 +55,61 @@ def convert_config_to_header(config):
         else:
             header_dict[f"{header_item['Property']}"] = header_item["Value"]
     return header_dict
+
+
+@app.get("/api/v0/hello")
+@app.post("/api/v0/hello")
+async def hello():
+    """
+    GETとPOSTメソッドで`/api/v0/hello`エンドポイントにアクセスすると、
+    JSON形式で`{"result": "hello"}`を返します。
+    """
+    return {"result": "hello"}
+
+
+# @app.get("/api/v0/service/configs")
+@app.get("/api/v0/configs")
+async def configs():
+    """
+    JSON形式で`{"result": [config_files]}`を返します。
+    """
+    # assets/privatesフォルダからyamlファイルを選択
+    config_files = ConfigFiles()
+    config_files_list = config_files.get_config_files_list()
+    return {"result": config_files_list}
+
+
+@app.post("/api/v0/config-title")
+async def config_title(request: Request):
+    api_logger = AppLogger(APP_NAME)
+    """
+    config_file で指定したファイルの`title`と`note`を返します。
+    """
+    try:
+        body_data = await request.json()
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=400, detail="Invalid JSON format in request body"
+        )
+
+    # 1. config_file の取得とYAML読み込み
+    print(body_data)
+    config_file_path = body_data.get("config_file")
+    api_logger.debug_log(f"Request Config title of {config_file_path}")
+    if not config_file_path:
+        raise HTTPException(
+            status_code=400,
+            detail="Missing 'config_file' in request body",
+        )
+    config_data = read_yaml_file(config_file_path)
+    result_data = {}
+    if "title" in config_data:
+        result_data["title"] = config_data.get("title")
+    if "note" in config_data:
+        result_data["note"] = config_data.get("note")
+
+    api_logger.debug_log(f"Return Config title: {result_data}")
+    return {"result": result_data}
 
 
 # @app.get("/api/v0/service/configs")
