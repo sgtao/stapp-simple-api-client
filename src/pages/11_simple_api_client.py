@@ -15,6 +15,8 @@ APP_TITLE = "Simple Api Client"
 
 
 def main():
+    st.page_link("main.py", label="Back to Home", icon="🏠")
+
     st.title(f"🧪 {APP_TITLE}")
     # インスタンス化
     request_header = ApiRequestHeader()

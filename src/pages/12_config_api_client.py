@@ -21,6 +21,8 @@ def apply_config_to_session_state(config):
 
 
 def main():
+    st.page_link("main.py", label="Back to Home", icon="🏠")
+
     st.title(f"🚀 {APP_TITLE}")
     """
     `assets`と`privates`配下のYAMLファイルを使ってAPIサービスにアクセスします

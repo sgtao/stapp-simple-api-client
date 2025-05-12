@@ -51,6 +51,8 @@ def main():
     app_logger = AppLogger(APP_TITLE)
     app_logger.app_start()
 
+    st.page_link("main.py", label="Back to Home", icon="🏠")
+
     st.title("Log Viewer")
     # ログファイルを選択
     log_files = app_logger.get_log_filelist()
