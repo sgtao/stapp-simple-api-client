@@ -1,5 +1,6 @@
 # ClientController.py
 from datetime import datetime
+import json
 import time
 import yaml
 
@@ -159,7 +160,20 @@ class ClientController:
             st.session_state.header_df = header_df
 
         if "req_body" in cfg_session_state:
-            st.session_state.req_body = cfg_session_state.get("req_body")
+            # st.session_state.req_body = _req_body
+            _req_body = cfg_session_state.get("req_body")
+            # print(f"req_body type: {type(_req_body)}")
+            if type(_req_body) is str:
+                # 文字列の場合はそのまま使用
+                st.session_state.req_body = _req_body
+            else:
+                # 辞書/リストの場合はJSON形式に変換
+                # st.session_state.req_body = yaml.dump(
+                #     _req_body, allow_unicode=True, default_flow_style=False
+                # )
+                st.session_state.req_body = json.dumps(
+                    _req_body, ensure_ascii=False, indent=4
+                )
         if "use_dynamic_inputs" in cfg_session_state:
             if cfg_session_state.get("use_dynamic_inputs") == "false":
                 st.session_state.use_dynamic_inputs = False
