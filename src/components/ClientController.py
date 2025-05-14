@@ -104,7 +104,7 @@ class ClientController:
             Dict[str, Any]: 処理済みの設定データ
         """
         try:
-            config = yaml.safe_load(uploaded_yaml)
+            config = yaml.safe_load(uploaded_yaml, "r", encoding="utf-8")
             # st.session_state.user_inputs = []
             # st.session_state.min_user_inputs =
             # _initialize_user_inputs(config)

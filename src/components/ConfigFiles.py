@@ -21,7 +21,7 @@ class ConfigFiles:
         return self.config_files
 
     def load_config_from_yaml(self, config_path):
-        with open(config_path, "r") as f:
+        with open(config_path, "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
 
     def render_config_selector(self):
