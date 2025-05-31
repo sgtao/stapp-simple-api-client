@@ -139,23 +139,15 @@ class ClientController:
             get_header = cfg_session_state.get("header_df")
             header_list = []
             for header_item in get_header:
-                if header_item["Property"] == "Authorization":
-                    auth_value = header_item["Value"].replace(
-                        "＜API_KEY＞", st.session_state.api_key
-                    )
-                    header_list.append(
-                        {
-                            "Property": header_item["Property"],
-                            "Value": auth_value,
-                        }
-                    )
-                else:
-                    header_list.append(
-                        {
-                            "Property": header_item["Property"],
-                            "Value": header_item["Value"],
-                        }
-                    )
+                auth_value = header_item["Value"].replace(
+                    "＜API_KEY＞", st.session_state.api_key
+                )
+                header_list.append(
+                    {
+                        "Property": header_item["Property"],
+                        "Value": auth_value,
+                    }
+                )
             header_df = pd.DataFrame(header_list)
             st.session_state.header_df = header_df
 
