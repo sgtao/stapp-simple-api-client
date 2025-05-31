@@ -9,6 +9,7 @@ from functions.AppLogger import AppLogger
 
 # APP_TITLE = "APIクライアントアプリ"
 APP_TITLE = "Log Viewer"
+DEFAULT_LOG_FILE = "logs/api_request.log"
 
 
 # ログファイル表示関数
@@ -59,14 +60,13 @@ def main():
     st.session_state.disable_rotate = False
 
     def _on_change_select():
-        st.session_state.disable_rotate = (
-            selected_log_file != "logs/api_request.log"
-        )
+        st.session_state.disable_rotate = selected_log_file != DEFAULT_LOG_FILE
 
+    index_log_file = log_files.index(DEFAULT_LOG_FILE)
     selected_log_file = st.selectbox(
         label="Select log file",
         options=log_files,
-        index=0,
+        index=index_log_file,
         on_change=_on_change_select,
     )
 
