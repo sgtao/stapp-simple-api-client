@@ -32,6 +32,18 @@ class ApiRequestInputs:
             st.session_state._use_dynamic_checkbox
         )
 
+    def get_method(self):
+        return st.session_state.method
+
+    def get_uri(self):
+        return st.session_state.uri
+
+    def get_req_body(self):
+        return st.session_state.req_body
+
+    def get_use_dynamic_inputs(self):
+        return st.session_state.use_dynamic_inputs
+
     def render_method_selector(self):
         return st.selectbox(
             label="HTTPメソッド",
