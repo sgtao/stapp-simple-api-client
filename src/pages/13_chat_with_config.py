@@ -1,4 +1,5 @@
 # 13_chat_with_config.py
+import json
 # import os
 import requests
 import time
@@ -7,14 +8,13 @@ import time
 
 import streamlit as st
 
-from functions.ApiRequestor import ApiRequestor
 from components.ApiRequestHeader import ApiRequestHeader
 from components.ApiRequestInputs import ApiRequestInputs
 from components.ClientController import ClientController
 from components.ConfigFiles import ConfigFiles
 from components.SideMenus import SideMenus
 
-# from functions.ApiRequestor import ApiRequestor
+from functions.ApiRequestor import ApiRequestor
 from functions.AppLogger import AppLogger
 
 # APP_TITLE = "APIクライアントアプリ"
@@ -33,10 +33,25 @@ class GroqAPI:
         self.url = uri
         self.header_dict = header_dict or {}
         self.req_body = req_body or {}
+        self.api_requestor = ApiRequestor()
 
-    def _response(self, messages):
+    def response(self, messages=[]):
         headers = self.header_dict.copy()
         payload = self.req_body
+        st.write(f"payload: {payload}")
+        if "messages" not in payload:
+            payload["messages"] = messages
+        else:
+            _messages = payload.get("messages")
+            if type(_messages) is list:
+                for message in messages:
+                    _messages.append(message)
+            else:
+                _messages = messages
+
+            payload["messages"] = _messages
+        # payload["messages"] = messages
+
         # payload.update(
         #     {
         #         "model": self.model_name,
@@ -48,20 +63,20 @@ class GroqAPI:
         #     }
         # )
         # stream=Trueでストリーミングレスポンスを受け取る
-        response = requests.post(
+        response = self.api_requestor.send_request(
             # self.api_url, headers=headers, json=payload, stream=True
             url=self.url,
+            method="POST",
             headers=headers,
             # json=payload,
-            data=payload,
-            stream=False,
+            body=payload,
         )
         response.raise_for_status()
         return response
 
-    def response(self, messages):
+    def single_response(self, messages=[]):
         try:
-            response = self._response(messages)
+            response = self.response(messages)
             return response.json()["choices"][0]["message"]["content"]
         except requests.exceptions.RequestException as e:
             st.error(f"APIリクエストに失敗しました: {e}")
@@ -80,14 +95,25 @@ class Message:
                 {
                     "role": "system",
                     "content": system_prompt,
-                }
+                },
             ]
 
     def add(self, role: str, content: str):
         st.session_state.messages.append({"role": role, "content": content})
+        with st.chat_message(role):
+            st.markdown(content)
 
     def get_messages(self):
-        return st.session_state.messages
+        response = []
+        for message in st.session_state.messages:
+            response.append(
+                {
+                    "role": message["role"],
+                    "content": message["content"],
+                }
+            )
+        # return st.session_state.messages
+        return response
 
     def display_chat_history(self):
         for message in st.session_state.messages:
@@ -95,10 +121,6 @@ class Message:
                 continue
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
-
-    def display_stream(self, generater):
-        with st.chat_message("assistant"):
-            return st.x(generater)
 
 
 # モーダルの定義
@@ -183,14 +205,11 @@ def main():
         pass
 
     # Chat with Config
-    user_input = st.chat_input("何か入力してください")
-
     message = Message()
+    message.display_chat_history()
 
+    user_input = st.chat_input("何か入力してください")
     if user_input:
-        message.add("user", user_input)
-        message.display_chat_history()
-
         # get response from GroqAPI
         # llm = GroqAPI(selected_model)
         if api_request_inputs.get_method() == "GET":
@@ -201,6 +220,7 @@ def main():
             time.sleep(3)
             st.rerun()
 
+        message.add("user", user_input)
         uri = api_request_inputs.get_uri()
         header_dict = request_header.get_header_dict()
         request_body = api_request_inputs.get_req_body()
@@ -211,16 +231,19 @@ def main():
             sent_uri = api_requestor.replace_uri(uri)
             if request_body:
                 sent_body = api_requestor.replace_body(request_body)
+        req_body = json.loads(sent_body)
         llm = GroqAPI(
             uri=sent_uri,
             header_dict=header_dict,
-            req_body=sent_body,
+            req_body=req_body,
         )
 
         # response = message.display_stream(
         #     generater=llm.response(message.get_messages())
         # )
-        response = llm.response(message.get_messages())
+        # response = llm.response(message.get_messages())
+        # response = llm.single_response()
+        response = llm.single_response(message.get_messages())
         # response = user_input
         message.add("assistant", response)
 
