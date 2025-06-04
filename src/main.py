@@ -18,6 +18,11 @@ st.page_link(
     label="Go to config_api_client App",
     icon="🚀",
 )
+st.page_link(
+    "pages/13_chat_with_config.py",
+    label="Go to ChatBot with config App",
+    icon="💬",
+)
 # ログ表示ページへのリンク
 st.page_link("pages/21_logs_viewer.py", label="View Logs", icon="📄")
 
