@@ -1,5 +1,6 @@
 # 13_chat_with_config.py
 import json
+
 # import os
 import requests
 import time
@@ -12,6 +13,7 @@ from components.ApiRequestHeader import ApiRequestHeader
 from components.ApiRequestInputs import ApiRequestInputs
 from components.ClientController import ClientController
 from components.ConfigFiles import ConfigFiles
+from components.ResponseViewer import extract_property_from_json
 from components.SideMenus import SideMenus
 
 from functions.ApiRequestor import ApiRequestor
@@ -38,7 +40,7 @@ class GroqAPI:
     def response(self, messages=[]):
         headers = self.header_dict.copy()
         payload = self.req_body
-        st.write(f"payload: {payload}")
+        # st.write(f"payload: {payload}")
         if "messages" not in payload:
             payload["messages"] = messages
         else:
@@ -77,7 +79,12 @@ class GroqAPI:
     def single_response(self, messages=[]):
         try:
             response = self.response(messages)
-            return response.json()["choices"][0]["message"]["content"]
+            # return response.json()["choices"][0]["message"]["content"]
+            response_json = response.json()
+            return extract_property_from_json(
+                response_json,
+                st.session_state.user_property_path,
+            )
         except requests.exceptions.RequestException as e:
             st.error(f"APIリクエストに失敗しました: {e}")
             time.sleep(3)
