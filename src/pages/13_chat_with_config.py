@@ -2,7 +2,7 @@
 import json
 
 # import os
-import requests
+# import requests
 import time
 
 # from pathlib import Path
@@ -11,123 +11,19 @@ import streamlit as st
 
 from components.ApiRequestHeader import ApiRequestHeader
 from components.ApiRequestInputs import ApiRequestInputs
+from components.ChatMessage import ChatMessage
 from components.ClientController import ClientController
 from components.ConfigFiles import ConfigFiles
-from components.ResponseViewer import extract_property_from_json
+
+# from components.ResponseViewer import extract_property_from_json
 from components.SideMenus import SideMenus
 
 from functions.ApiRequestor import ApiRequestor
 from functions.AppLogger import AppLogger
+from functions.GroqAPI import GroqAPI
 
 # APP_TITLE = "APIクライアントアプリ"
 APP_TITLE = "Chat with Config"
-
-
-class GroqAPI:
-    def __init__(
-        self,
-        uri: str = "https://api.groq.com/openai/v1/chat/completions",
-        model_name: str = "llama-3.3-70b-versatile",
-        header_dict: dict = None,
-        req_body: dict = None,
-    ):
-        self.model_name = model_name
-        self.url = uri
-        self.header_dict = header_dict or {}
-        self.req_body = req_body or {}
-        self.api_requestor = ApiRequestor()
-
-    def response(self, messages=[]):
-        headers = self.header_dict.copy()
-        payload = self.req_body
-        # st.write(f"payload: {payload}")
-        if "messages" not in payload:
-            payload["messages"] = messages
-        else:
-            _messages = payload.get("messages")
-            if type(_messages) is list:
-                for message in messages:
-                    _messages.append(message)
-            else:
-                _messages = messages
-
-            payload["messages"] = _messages
-        # payload["messages"] = messages
-
-        # payload.update(
-        #     {
-        #         "model": self.model_name,
-        #         "messages": messages,
-        #         "temperature": 0,
-        #         "max_tokens": 4096,
-        #         "stream": True,
-        #         "stop": None,
-        #     }
-        # )
-        # stream=Trueでストリーミングレスポンスを受け取る
-        response = self.api_requestor.send_request(
-            # self.api_url, headers=headers, json=payload, stream=True
-            url=self.url,
-            method="POST",
-            headers=headers,
-            # json=payload,
-            body=payload,
-        )
-        response.raise_for_status()
-        return response
-
-    def single_response(self, messages=[]):
-        try:
-            response = self.response(messages)
-            # return response.json()["choices"][0]["message"]["content"]
-            response_json = response.json()
-            return extract_property_from_json(
-                response_json,
-                st.session_state.user_property_path,
-            )
-        except requests.exceptions.RequestException as e:
-            st.error(f"APIリクエストに失敗しました: {e}")
-            time.sleep(3)
-            st.rerun()
-
-
-class Message:
-    system_prompt: str = (
-        """あなたは聡明なAIです。ユーザの入力に全て日本語で返答を生成してください"""
-    )
-
-    def __init__(self, system_prompt: str = system_prompt):
-        if "messages" not in st.session_state:
-            st.session_state.messages = [
-                {
-                    "role": "system",
-                    "content": system_prompt,
-                },
-            ]
-
-    def add(self, role: str, content: str):
-        st.session_state.messages.append({"role": role, "content": content})
-        with st.chat_message(role):
-            st.markdown(content)
-
-    def get_messages(self):
-        response = []
-        for message in st.session_state.messages:
-            response.append(
-                {
-                    "role": message["role"],
-                    "content": message["content"],
-                }
-            )
-        # return st.session_state.messages
-        return response
-
-    def display_chat_history(self):
-        for message in st.session_state.messages:
-            if message["role"] == "system":
-                continue
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
 
 
 # モーダルの定義
@@ -212,7 +108,7 @@ def main():
         pass
 
     # Chat with Config
-    message = Message()
+    message = ChatMessage()
     message.display_chat_history()
 
     user_input = st.chat_input("何か入力してください")
@@ -239,20 +135,26 @@ def main():
             if request_body:
                 sent_body = api_requestor.replace_body(request_body)
         req_body = json.loads(sent_body)
-        llm = GroqAPI(
-            uri=sent_uri,
-            header_dict=header_dict,
-            req_body=req_body,
-        )
+        try:
+            llm = GroqAPI(
+                uri=sent_uri,
+                header_dict=header_dict,
+                req_body=req_body,
+                user_property_path=st.session_state.user_property_path,
+            )
 
-        # response = message.display_stream(
-        #     generater=llm.response(message.get_messages())
-        # )
-        # response = llm.response(message.get_messages())
-        # response = llm.single_response()
-        response = llm.single_response(message.get_messages())
-        # response = user_input
-        message.add("assistant", response)
+            # response = message.display_stream(
+            #     generater=llm.response(message.get_messages())
+            # )
+            # response = llm.response(message.get_messages())
+            # response = llm.single_response()
+            response = llm.single_response(message.get_messages())
+            # response = user_input
+            message.add("assistant", response)
+        except Exception as e:
+            st.error(f"APIリクエストに失敗しました: {e}")
+            time.sleep(3)
+            st.rerun()
 
 
 # if __name__ == "__main__":
