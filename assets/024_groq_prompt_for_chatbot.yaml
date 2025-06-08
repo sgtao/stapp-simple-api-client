@@ -1,8 +1,11 @@
 # groq_prompt_for_chatbot.yaml
 title: groq system prompt for chatbot app
-note:
-  Grop API config with `user_input_0` model has system prompt for chatbot app.
-  model i.e. is `llama-3.3-70b-versatile` or `llama-3.1-8b-instant` etc.
+note: |
+  - Grop API config with `user_input_0` model has system prompt for chatbot app.
+  - From [Grop API models for chat](https://console.groq.com/docs/models), select one and input `user_input_0`. i.e.:
+    - `gemma2-9b-it`
+    - `llama-3.3-70b-versatile`
+    - `llama-3.1-8b-instant`
 session_state:
   header_df:
   - Property: Content-Type
