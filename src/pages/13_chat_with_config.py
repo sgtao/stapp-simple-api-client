@@ -26,6 +26,11 @@ from functions.GroqAPI import GroqAPI
 APP_TITLE = "Chat with Config"
 
 
+def initialize_session_state():
+    if "config_loaded" not in st.session_state:
+        st.session_state.config_loaded = False
+
+
 # モーダルの定義
 @st.dialog("Show Configed Request.")
 def modal_request_viewer(request_header, request_inputs):
@@ -89,6 +94,8 @@ def main():
             # 読み込んだコンフィグをセッションステートに適用
             # apply_config_to_session_state(config)
             client_controller.set_session_state(config)
+            st.session_state.config_loaded = True
+            # if "title" in config
             st.rerun()
     with col2:
         if st.button("Show Config. Request"):
@@ -111,7 +118,10 @@ def main():
     message = ChatMessage()
     message.display_chat_history()
 
-    user_input = st.chat_input("何か入力してください")
+    user_input = st.chat_input(
+        placeholder="After load config, Submit any message",
+        disabled=not st.session_state.config_loaded,
+    )
     if user_input:
         # get response from GroqAPI
         # llm = GroqAPI(selected_model)
@@ -160,6 +170,7 @@ def main():
 # if __name__ == "__main__":
 #     main()
 if __name__ == "__main__":
+    initialize_session_state()
     app_logger = AppLogger(APP_TITLE)
     app_logger.app_start()
     side_menus = SideMenus()
