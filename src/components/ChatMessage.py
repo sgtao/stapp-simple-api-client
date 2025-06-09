@@ -14,17 +14,30 @@ class ChatMessage:
 
     def __init__(self, system_prompt: str = system_prompt):
         if "messages" not in st.session_state:
-            st.session_state.messages = [
-                {
-                    "role": "system",
-                    "content": system_prompt,
-                },
-            ]
+            self.reset()
+
+    def reset(self):
+        st.session_state.messages = [
+            {
+                "role": "system",
+                "content": self.system_prompt,
+            },
+        ]
 
     def add(self, role: str, content: str):
         st.session_state.messages.append({"role": role, "content": content})
         with st.chat_message(role):
             st.markdown(content)
+
+    def set_messages(self, messages):
+        st.session_state.messages = []
+        for message in messages:
+            st.session_state.messages.append(
+                {
+                    "role": message["role"],
+                    "content": message["content"],
+                }
+            )
 
     def get_messages(self):
         response = []

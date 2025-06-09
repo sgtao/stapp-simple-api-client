@@ -20,6 +20,7 @@ from components.SideMenus import SideMenus
 
 from functions.ApiRequestor import ApiRequestor
 from functions.AppLogger import AppLogger
+from functions.ConfigProcess import ConfigProcess
 from functions.GroqAPI import GroqAPI
 
 # APP_TITLE = "APIクライアントアプリ"
@@ -70,6 +71,9 @@ def main():
     request_header = ApiRequestHeader()
     api_request_inputs = ApiRequestInputs()
 
+    message = ChatMessage()
+    config_process = ConfigProcess()
+
     # assets/privatesフォルダからyamlファイルを選択
     config_files = ConfigFiles()
 
@@ -92,10 +96,14 @@ def main():
     with col1:
         if st.button("Load Config File"):
             # 読み込んだコンフィグをセッションステートに適用
-            # apply_config_to_session_state(config)
             client_controller.set_session_state(config)
+            config_process.set_config(config)
+            req_body_dict = config_process.get_request_body()
+            if "messages" in req_body_dict:
+                # st.write(req_body_dict["messages"])
+                message.set_messages(req_body_dict["messages"])
+
             st.session_state.config_loaded = True
-            # if "title" in config
             st.rerun()
     with col2:
         if st.button("Show Config. Request"):
@@ -115,7 +123,6 @@ def main():
         pass
 
     # Chat with Config
-    message = ChatMessage()
     message.display_chat_history()
 
     user_input = st.chat_input(
