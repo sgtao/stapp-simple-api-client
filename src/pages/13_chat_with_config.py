@@ -153,11 +153,16 @@ def main():
                 sent_body = api_requestor.replace_body(request_body)
         req_body = json.loads(sent_body)
         try:
+            # user_property_path = config_process.get_from_session_sts(
+            #     "user_property_path"
+            # )
+            user_property_path = st.session_state.user_property_path
             llm = GroqAPI(
                 uri=sent_uri,
                 header_dict=header_dict,
                 req_body=req_body,
-                user_property_path=st.session_state.user_property_path,
+                # user_property_path=st.session_state.user_property_path,
+                user_property_path=user_property_path,
             )
 
             # response = message.display_stream(
