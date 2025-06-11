@@ -50,30 +50,31 @@ def convert_config_to_header(config):
 
     config_headers = config.get("header_df")
     for header_item in config_headers:
-        if header_item["Property"] == "Authorization":
-            auth_value = header_item["Value"].replace("＜API_KEY＞", api_key)
-            header_dict["Authorization"] = auth_value
-        else:
-            header_dict[f"{header_item['Property']}"] = header_item["Value"]
+        auth_value = header_item["Value"].replace("＜API_KEY＞", api_key)
+        header_dict[f"{header_item['Property']}"] = auth_value
     return header_dict
 
 
 @app.get("/api/v0/hello")
 @app.post("/api/v0/hello")
-async def hello():
+async def hello(request: Request):
     """
     GETとPOSTメソッドで`/api/v0/hello`エンドポイントにアクセスすると、
     JSON形式で`{"result": "hello"}`を返します。
     """
+    api_logger = AppLogger(APP_NAME)
+    api_logger.info_log(f"{request.url.path} Receive {request.method}")
     return {"result": "hello"}
 
 
 # @app.get("/api/v0/service/configs")
 @app.get("/api/v0/configs")
-async def configs():
+async def configs(request: Request):
     """
     JSON形式で`{"result": [config_files]}`を返します。
     """
+    api_logger = AppLogger(APP_NAME)
+    api_logger.info_log(f"{request.url.path} Receive {request.method}")
     # assets/privatesフォルダからyamlファイルを選択
     config_files = ConfigFiles()
     config_files_list = config_files.get_config_files_list()
@@ -94,7 +95,7 @@ async def config_title(request: Request):
         )
 
     # 1. config_file の取得とYAML読み込み
-    print(body_data)
+    print(f"Receive message in {body_data}")
     config_file_path = body_data.get("config_file")
     api_logger.debug_log(f"Request Config title of {config_file_path}")
     if not config_file_path:
@@ -116,23 +117,27 @@ async def config_title(request: Request):
 # @app.get("/api/v0/service/configs")
 @app.post("/api/v0/service")
 async def execute_service(request: Request):
-    api_logger = AppLogger(APP_NAME)
     """
     config_file で指定したAPIを実行し、
     JSON形式で`{"result": [user_property value]}`を返します。
     """
+    api_logger = AppLogger(APP_NAME)
+    api_logger.info_log(f"{request.url.path} Receive {request.method}")
     # assets/privatesフォルダからyamlファイルを選択
     # config_files = ConfigFiles()
     # config_files_list = config_files.get_config_files_list()
     try:
         body_data = await request.json()
+        api_logger.debug_log(
+            f"{request.url.path} Receive message is {body_data}"
+        )
     except json.JSONDecodeError:
         raise HTTPException(
             status_code=400, detail="Invalid JSON format in request body"
         )
 
     # 1. config_file の取得とYAML読み込み
-    print(body_data)
+    print(f"Receive message in {body_data}")
     config_file_path = body_data.get("config_file")
     if not config_file_path:
         raise HTTPException(
@@ -140,6 +145,7 @@ async def execute_service(request: Request):
             detail="Missing 'config_file' in request body",
         )
     config_data = read_yaml_file(config_file_path)
+    api_logger.info_log(f"{request.url.path} use Config: {config_data}")
 
     # 2. Config データへの user_input_* の適用 (プレースホルダ置換)
     # processed_config = apply_user_inputs(config_data, user_inputs)
@@ -161,6 +167,7 @@ async def execute_service(request: Request):
         )
 
     req_body_template_str = processed_config.get("req_body")
+    print(f"req_body_template_str: {req_body_template_str}")
     response_path = processed_config.get("user_property_path")
 
     if not api_url:
@@ -364,14 +371,18 @@ async def execute_service(request: Request):
 # process request with message via `/api/v0/messages"`
 @app.post("/api/v0/messages")
 async def post_messages(request: Request):
-    api_logger = AppLogger(APP_NAME)
     """
     messagesを含むリクエストを受け取り、
     config_file で指定したAPIを実行し、
     JSON形式で`{"result": [user_property value]}`を返します。
     """
+    api_logger = AppLogger(APP_NAME)
+    api_logger.info_log(f"{request.url.path} Receive {request.method}")
     try:
         body_data = await request.json()
+        api_logger.debug_log(
+            f"{request.url.path} Receive message is {body_data}"
+        )
     except json.JSONDecodeError:
         raise HTTPException(
             status_code=400, detail="Invalid JSON format in request body"
@@ -390,7 +401,7 @@ async def post_messages(request: Request):
         )
 
     # 1. config_file の取得とYAML読み込み
-    print(body_data)
+    print(f"Receive message in {body_data}")
     config_file_path = body_data.get("config_file")
     if not config_file_path:
         raise HTTPException(
@@ -399,6 +410,7 @@ async def post_messages(request: Request):
         )
     config_data = read_yaml_file(config_file_path)
     config_process = ConfigProcess(config_data)
+    print(f"config_data: {config_process.get_from_session_sts()}")
 
     # 2. Config データへの user_input_* の適用 (プレースホルダ置換)
     processed_config = config_data.get("session_state")
@@ -455,19 +467,32 @@ async def post_messages(request: Request):
     api_logger.debug_log(f"Final request URI: {replaced_uri}")
 
     # リクエストボディのプレースホルダ置換とJSONパース
+
+    def replace_body(num_user_inputs, user_inputs, body):
+        replaced_body = body
+        for i in range(num_user_inputs):
+            key = f"user_input_{i}"
+            value = user_inputs[f"user_input_{i}"].replace('"', "'")
+            replaced_body = replaced_body.replace(f"＜{key}＞", value)
+
+        return replaced_body
+
     # request_body_dict = None
     request_body_dict = config_process.get_request_body()
+    print(request_body_dict)
+    num_user_inputs = body_data.get("num_user_inputs", 0)
+    user_inputs = body_data.get("user_inputs", {})
     request_messages = request_body_dict.get("messages", [])
     request_messages.append(body_data["messages"])
     request_body_dict["messages"] = request_messages
+    send_body = replace_body(num_user_inputs, user_inputs, request_body_dict)
+    print(send_body)
 
     # 5. 外部APIへのリクエスト発行
     try:
         # api_requestor = ApiRequestor()
         api_requestor = requests.Session()  # セッションを使うと効率が良い
-        api_logger.api_start_log(
-            replaced_uri, method, headers, request_body_dict
-        )
+        api_logger.api_start_log(replaced_uri, method, headers, send_body)
 
         # response = api_requestor.send_request(
         # response = await api_requestor.request(

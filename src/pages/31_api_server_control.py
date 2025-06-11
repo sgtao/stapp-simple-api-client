@@ -194,12 +194,12 @@ def modal_post_service(port, config_files):
         config_file = render_config_selector(config_files)
         if st.button(label="POST", icon="🚀"):
             try:
-                # Config File 情報を取得
-                config_title = test_config_title(
-                    port=port, config_file=config_file
-                )
-                if "result" in config_title:
-                    st.info(f"Run Config: {config_title["result"]}")
+                # # Config File 情報を取得
+                # config_title = test_config_title(
+                #     port=port, config_file=config_file
+                # )
+                # if "result" in config_title:
+                #     st.info(f"Run Config: {config_title["result"]}")
 
                 # POST リクエストを送信
                 response = test_post_service(
