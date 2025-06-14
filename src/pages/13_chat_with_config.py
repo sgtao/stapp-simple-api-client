@@ -148,7 +148,7 @@ def main():
 
             # replace llm request
             if st.session_state.use_dynamic_inputs:
-                llm.prepare_dynamic_request()
+                llm.prepare_dynamic_request(st.session_state)
 
             # send message:
             response = llm.single_response(message.get_messages())

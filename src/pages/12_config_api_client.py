@@ -77,9 +77,11 @@ def main():
                 sent_uri = uri
                 sent_body = request_body
                 if st.session_state.use_dynamic_inputs:
-                    sent_uri = api_requestor.replace_uri(uri)
+                    sent_uri = api_requestor.replace_uri(st.session_state, uri)
                     if request_body:
-                        sent_body = api_requestor.replace_body(request_body)
+                        sent_body = api_requestor.replace_body(
+                            st.session_state, request_body
+                        )
 
                 # st.text(sent_body)
                 body_json = json.loads(sent_body) if request_body else None

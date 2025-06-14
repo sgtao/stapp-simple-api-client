@@ -2,7 +2,7 @@
 import requests
 import urllib.parse
 
-import streamlit as st
+# import streamlit as st
 
 from functions.AppLogger import AppLogger
 
@@ -77,20 +77,20 @@ class ApiRequestor:
             self.api_logger.error_log(f"An unexpected error occurred: {e}")
             raise
 
-    def replace_uri(self, uri):
+    def replace_uri(self, session_state, uri):
         replaced_uri = uri
-        for i in range(st.session_state.num_inputs):
+        for i in range(session_state.num_inputs):
             key = f"user_input_{i}"
-            value = urllib.parse.quote(st.session_state[f"user_input_{i}"])
+            value = urllib.parse.quote(session_state[f"user_input_{i}"])
             replaced_uri = replaced_uri.replace(f"＜{key}＞", value)
 
         return replaced_uri
 
-    def replace_body(self, body):
+    def replace_body(self, session_state, body):
         replaced_body = body
-        for i in range(st.session_state.num_inputs):
+        for i in range(session_state.num_inputs):
             key = f"user_input_{i}"
-            value = st.session_state[f"user_input_{i}"].replace('"', "'")
+            value = session_state[f"user_input_{i}"].replace('"', "'")
             replaced_body = replaced_body.replace(f"＜{key}＞", value)
 
         return replaced_body
