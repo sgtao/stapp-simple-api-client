@@ -82,7 +82,7 @@ def main():
     # Load Config and show Request settings
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
-        if st.button("Load Config File"):
+        if st.button("Load Config File", icon="📤"):
             # 読み込んだコンフィグをセッションステートに適用
             client_controller.set_session_state(config)
             config_process.set_config(config)
@@ -94,14 +94,14 @@ def main():
             st.session_state.config_loaded = True
             st.rerun()
     with col2:
-        if st.button("Show Config. Request"):
+        if st.button("Show Config. Request", icon="ℹ️"):
             # response = test_post_service(port)
             modal_request_viewer(
                 request_header=request_header,
                 request_inputs=api_request_inputs,
             )
     with col3:
-        if st.button("Clear Session States"):
+        if st.button("Clear Session States", icon="🔄"):
             # 全てのセッション状態をクリアする場合はこちらを使用
             st.session_state.clear()
             st.rerun()

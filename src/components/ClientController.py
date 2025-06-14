@@ -231,6 +231,12 @@ class ClientController:
             ):
                 self.modal("load_state")
         with col4:
-            pass
+            if st.button(
+                help="Clear Session States",
+                label="🔄",
+            ):
+                # 全てのセッション状態をクリアする場合はこちらを使用
+                st.session_state.clear()
+                st.rerun()
         with col5:
             pass
