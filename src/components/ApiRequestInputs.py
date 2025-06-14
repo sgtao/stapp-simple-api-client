@@ -62,12 +62,15 @@ class ApiRequestInputs:
         )
 
     def render_body_input(self):
-        ext_url = "https://tools.m-bsys.com/dev_tools/json-beautifier.php"
+        ext_url_json = "https://tools.m-bsys.com/dev_tools/json-beautifier.php"
+        ext_url_yaml = "https://www.site24x7.com/ja/tools/json-to-yaml.html"
+        label_str = f"ツール：JSON形式整形 ([JSONきれい]({ext_url_json})）" \
+            f" / YAML形式へ変換（[YAML変換]({ext_url_yaml})）"
         # リクエストボディ入力（POST, PUTの場合のみ表示）
         if st.session_state.method in ["POST", "PUT"]:
             with st.expander("リクエストボディ設定"):
                 return st.text_area(
-                    label=f"JSON形式で入力 (ツール：[JSONきれい]({ext_url}))",
+                    label=label_str,
                     key="_body_input",
                     value=st.session_state.req_body,
                     on_change=self._update_req_body,
