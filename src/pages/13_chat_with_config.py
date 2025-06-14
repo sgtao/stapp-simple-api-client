@@ -153,9 +153,12 @@ def main():
             response = llm.single_response(message.get_messages())
 
             message.add("assistant", response)
+
         except Exception as e:
             st.error(f"APIリクエストに失敗しました: {e}")
             time.sleep(3)
+
+        finally:
             st.rerun()
 
 

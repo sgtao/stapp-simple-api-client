@@ -59,9 +59,11 @@ class ClientController:
         with st.expander("Save Session State ?", expanded=False):
             pad = "stappApiClientState.yaml"
             time_stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-            file_name = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_{pad}"
+            file_name_conf = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_{pad}"
+            pad = "stappApiClientMessages.yaml"
+            file_name_msgs = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_{pad}"
             # セッション状態からパラメータを取得
-            save_data = {
+            conf_data = {
                 "time_stamp": time_stamp,
                 "session_state": {
                     "method": st.session_state.method,
@@ -75,19 +77,37 @@ class ClientController:
                     "user_property_path": st.session_state.user_property_path,
                 },
             }
+            messages = []
+            if "messages" in st.session_state:
+                if len(st.session_state.messages) > 0:
+                    messages = {
+                        "time_stamp": time_stamp,
+                        "messages": st.session_state.messages.copy()
+                    }
+                    
 
             # YAMLに変換
-            yaml_str = yaml.dump(
-                save_data, allow_unicode=True, default_flow_style=False
+            conf_yaml = yaml.dump(
+                conf_data, allow_unicode=True, default_flow_style=False
+            )
+            msgs_yaml = yaml.dump(
+                messages, allow_unicode=True, default_flow_style=False
             )
 
             # ダウンロードボタンを表示
             st.download_button(
-                label="Download as YAML",
-                data=yaml_str,
-                file_name=file_name,
+                label="Download YAML for config",
+                data=conf_yaml,
+                file_name=file_name_conf,
                 mime="text/yaml",
             )
+            if len(messages) > 0:
+                st.download_button(
+                    label="Download Messages",
+                    data=msgs_yaml,
+                    file_name=file_name_msgs,
+                    mime="text/yaml",
+                )
 
     # 『読込み』モーダル：
     def _on_file_upload(self):
