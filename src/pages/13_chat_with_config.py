@@ -1,11 +1,5 @@
 # 13_chat_with_config.py
-# import json
-
-# import os
-# import requests
 import time
-
-# from pathlib import Path
 
 import streamlit as st
 
@@ -15,10 +9,8 @@ from components.ChatMessage import ChatMessage
 from components.ClientController import ClientController
 from components.ConfigFiles import ConfigFiles
 
-# from components.ResponseViewer import extract_property_from_json
 from components.SideMenus import SideMenus
 
-# from functions.ApiRequestor import ApiRequestor
 from functions.AppLogger import AppLogger
 from functions.ConfigProcess import ConfigProcess
 from functions.GroqAPI import GroqAPI
@@ -64,9 +56,6 @@ def main():
 
     st.title(f"💬 {APP_TITLE}")
     # インスタンス化
-    # request_header = ApiRequestHeader()
-    # request_inputs = ApiRequestInputs()
-    # api_requestor = ApiRequestor()
     client_controller = ClientController()
     request_header = ApiRequestHeader()
     api_request_inputs = ApiRequestInputs()
@@ -83,7 +72,6 @@ def main():
         )
         return
 
-    # selected_config_file = st.selectbox("Select a config file", config_files)
     selected_config_file = config_files.render_config_selector()
 
     # 選択されたコンフィグファイルを読み込む
@@ -145,18 +133,8 @@ def main():
         header_dict = request_header.get_header_dict()
         request_body = api_request_inputs.get_req_body()
         # URIとリクエストボディのJSON形式検証
-        # sent_uri = uri
-        # sent_body = request_body
-        # if st.session_state.use_dynamic_inputs:
-        #     sent_uri = api_requestor.replace_uri(uri)
-        #     if request_body:
-        #         sent_body = api_requestor.replace_body(request_body)
-        # req_body = json.loads(sent_body)
 
         try:
-            # user_property_path = config_process.get_from_session_sts(
-            #     "user_property_path"
-            # )
             user_property_path = st.session_state.user_property_path
             llm = GroqAPI(
                 # uri=sent_uri,
@@ -168,16 +146,13 @@ def main():
                 user_property_path=user_property_path,
             )
 
+            # replace llm request
             if st.session_state.use_dynamic_inputs:
                 llm.prepare_dynamic_request()
 
-            # response = message.display_stream(
-            #     generater=llm.response(message.get_messages())
-            # )
-            # response = llm.response(message.get_messages())
-            # response = llm.single_response()
+            # send message:
             response = llm.single_response(message.get_messages())
-            # response = user_input
+
             message.add("assistant", response)
         except Exception as e:
             st.error(f"APIリクエストに失敗しました: {e}")
@@ -185,8 +160,7 @@ def main():
             st.rerun()
 
 
-# if __name__ == "__main__":
-#     main()
+# render page
 if __name__ == "__main__":
     initialize_session_state()
     app_logger = AppLogger(APP_TITLE)

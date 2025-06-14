@@ -1,11 +1,6 @@
 # GroqAPI.py
 import json
 
-# import os
-# import requests
-# import time
-
-# from pathlib import Path
 from components.ResponseViewer import extract_property_from_json
 
 from functions.ApiRequestor import ApiRequestor
