@@ -57,12 +57,15 @@ class ApiRequestor:
             self.api_logger.error_log(f"HTTP error occurred: {http_err}")
 
             # HTTPエラー時の処理
-            st.error(f"HTTPエラー: {http_err}")
+            err_msg = ""
+            err_msg += f"HTTPエラー: {http_err}\n"
             if hasattr(http_err.response, "status_code"):
-                st.error(f"ステータスコード: {http_err.response.status_code}")
-                st.error(f"理由: {http_err.response.reason}")
-                st.error(f"詳細: {http_err.response.json()}")
-            return None
+                err_msg += (
+                    f"ステータスコード: {http_err.response.status_code}\n"
+                )
+                err_msg += f"理由: {http_err.response.reason}\n"
+                err_msg += f"詳細: {http_err.response.json()}"
+            raise err_msg
 
         except requests.exceptions.RequestException as req_err:
             # その他のリクエストエラー時のログ

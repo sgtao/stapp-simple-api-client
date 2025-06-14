@@ -1,5 +1,5 @@
 # GroqAPI.py
-# import json
+import json
 
 # import os
 # import requests
@@ -29,6 +29,13 @@ class GroqAPI:
         self.req_body = req_body or {}
         self.api_requestor = ApiRequestor()
         self.user_property_path = user_property_path
+
+    def prepare_dynamic_request(self):
+        """URIとリクエストボディの動的変数置換を行う"""
+        self.url = self.api_requestor.replace_uri(self.url)
+        _req_body = self.api_requestor.replace_body(self.req_body)
+        # print(f"req_body: {_req_body}")
+        self.req_body = json.loads(_req_body)
 
     def response(self, messages=[]):
         headers = self.header_dict.copy()

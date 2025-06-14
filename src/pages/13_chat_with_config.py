@@ -1,5 +1,5 @@
 # 13_chat_with_config.py
-import json
+# import json
 
 # import os
 # import requests
@@ -18,7 +18,7 @@ from components.ConfigFiles import ConfigFiles
 # from components.ResponseViewer import extract_property_from_json
 from components.SideMenus import SideMenus
 
-from functions.ApiRequestor import ApiRequestor
+# from functions.ApiRequestor import ApiRequestor
 from functions.AppLogger import AppLogger
 from functions.ConfigProcess import ConfigProcess
 from functions.GroqAPI import GroqAPI
@@ -66,7 +66,7 @@ def main():
     # インスタンス化
     # request_header = ApiRequestHeader()
     # request_inputs = ApiRequestInputs()
-    api_requestor = ApiRequestor()
+    # api_requestor = ApiRequestor()
     client_controller = ClientController()
     request_header = ApiRequestHeader()
     api_request_inputs = ApiRequestInputs()
@@ -145,25 +145,31 @@ def main():
         header_dict = request_header.get_header_dict()
         request_body = api_request_inputs.get_req_body()
         # URIとリクエストボディのJSON形式検証
-        sent_uri = uri
-        sent_body = request_body
-        if st.session_state.use_dynamic_inputs:
-            sent_uri = api_requestor.replace_uri(uri)
-            if request_body:
-                sent_body = api_requestor.replace_body(request_body)
-        req_body = json.loads(sent_body)
+        # sent_uri = uri
+        # sent_body = request_body
+        # if st.session_state.use_dynamic_inputs:
+        #     sent_uri = api_requestor.replace_uri(uri)
+        #     if request_body:
+        #         sent_body = api_requestor.replace_body(request_body)
+        # req_body = json.loads(sent_body)
+
         try:
             # user_property_path = config_process.get_from_session_sts(
             #     "user_property_path"
             # )
             user_property_path = st.session_state.user_property_path
             llm = GroqAPI(
-                uri=sent_uri,
+                # uri=sent_uri,
+                uri=uri,
                 header_dict=header_dict,
-                req_body=req_body,
+                # req_body=req_body,
+                req_body=request_body,
                 # user_property_path=st.session_state.user_property_path,
                 user_property_path=user_property_path,
             )
+
+            if st.session_state.use_dynamic_inputs:
+                llm.prepare_dynamic_request()
 
             # response = message.display_stream(
             #     generater=llm.response(message.get_messages())
