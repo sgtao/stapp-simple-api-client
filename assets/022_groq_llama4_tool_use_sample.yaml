@@ -1,17 +1,19 @@
-# groq_llama3_tool_use_sample.yaml
-title:groq_llama3_tool_use_sample
-note:
-  Grop API（llama3.3）で`tools`プロパティ利用例。
-  利用方法：`user_input_0` に県名・市名を入力してください（i.e. Tokyo ）
+# groq_llama4_tool_use_sample.yaml
+# title: groq_llama3_tool_use_sample
+title: Groq Llama4 tool use sample
+note: |
+  - Grop API（llama4 17b）で`tools`プロパティ利用例。
+  - 利用方法：**`user_input_0` に県名・市名を入力してください（i.e. Tokyo ）**
 session_state:
   header_df:
-  - Property:Content-Type
-    Value:application/json
-  - Property:Authorization
-    Value:Bearer ＜API_KEY＞
-  method:POST
+  - Property: Content-Type
+    Value: application/json
+  - Property: Authorization
+    Value: Bearer ＜API_KEY＞
+  method: POST
   req_body:
-    model: "llama-3.3-70b-versatile"
+    # model: "llama-3.3-70b-versatile"
+    model: "meta-llama/llama-4-scout-17b-16e-instruct"
     messages:
     - role: "user"
       content: "What'''s the weather like in ＜user_input_0＞?"
@@ -34,6 +36,6 @@ session_state:
           required:
           - "location"
     tool_choice: "auto"
-  uri:https://api.groq.com/openai/v1/chat/completions
-  use_dynamic_inputs:true
-  user_property_path:choices[0].message.tool_calls
+  uri: https://api.groq.com/openai/v1/chat/completions
+  use_dynamic_inputs: true
+  user_property_path: choices[0].message.tool_calls
