@@ -1,4 +1,4 @@
-# GroqAPI.py
+# LlmAPI.py
 import json
 
 from components.ResponseViewer import extract_property_from_json
@@ -6,10 +6,10 @@ from components.ResponseViewer import extract_property_from_json
 from functions.ApiRequestor import ApiRequestor
 
 # APP_TITLE = "APIクライアントアプリ"
-APP_TITLE = "GroqAPI"
+APP_TITLE = "LlmAPI"
 
 
-class GroqAPI:
+class LlmAPI:
     def __init__(
         self,
         uri: str = "https://api.groq.com/openai/v1/chat/completions",

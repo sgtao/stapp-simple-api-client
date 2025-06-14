@@ -13,7 +13,7 @@ from components.SideMenus import SideMenus
 
 from functions.AppLogger import AppLogger
 from functions.ConfigProcess import ConfigProcess
-from functions.GroqAPI import GroqAPI
+from functions.LlmAPI import LlmAPI
 
 # APP_TITLE = "APIクライアントアプリ"
 APP_TITLE = "Chat with Config"
@@ -118,8 +118,7 @@ def main():
         disabled=not st.session_state.config_loaded,
     )
     if user_input:
-        # get response from GroqAPI
-        # llm = GroqAPI(selected_model)
+        # get response from LlmAPI
         if api_request_inputs.get_method() == "GET":
             st.warning(
                 "GETメソッドは、リクエストボディを送信しません。"
@@ -136,7 +135,7 @@ def main():
 
         try:
             user_property_path = st.session_state.user_property_path
-            llm = GroqAPI(
+            llm = LlmAPI(
                 # uri=sent_uri,
                 uri=uri,
                 header_dict=header_dict,
