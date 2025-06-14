@@ -59,9 +59,13 @@ class ClientController:
         with st.expander("Save Session State ?", expanded=False):
             pad = "stappApiClientState.yaml"
             time_stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-            file_name_conf = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_{pad}"
+            file_name_conf = (
+                f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_{pad}"
+            )
             pad = "stappApiClientMessages.yaml"
-            file_name_msgs = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_{pad}"
+            file_name_msgs = (
+                f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_{pad}"
+            )
             # セッション状態からパラメータを取得
             conf_data = {
                 "time_stamp": time_stamp,
@@ -80,18 +84,16 @@ class ClientController:
             messages = []
             if "messages" in st.session_state:
                 if len(st.session_state.messages) > 0:
-                    messages = {
-                        "time_stamp": time_stamp,
-                        "messages": st.session_state.messages.copy()
-                    }
-                    
+                    messages = st.session_state.messages.copy()
 
             # YAMLに変換
             conf_yaml = yaml.dump(
                 conf_data, allow_unicode=True, default_flow_style=False
             )
             msgs_yaml = yaml.dump(
-                messages, allow_unicode=True, default_flow_style=False
+                data={"time_stamp": time_stamp, "messages": messages},
+                allow_unicode=True,
+                default_flow_style=False,
             )
 
             # ダウンロードボタンを表示
