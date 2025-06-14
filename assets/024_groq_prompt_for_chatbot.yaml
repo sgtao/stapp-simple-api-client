@@ -3,9 +3,9 @@ title: groq system prompt for chatbot app
 note: |
   - Grop API config with `user_input_0` model has system prompt for chatbot app.
   - From [Grop API models for chat](https://console.groq.com/docs/models), select one and input `user_input_0`. i.e.:
-    - `gemma2-9b-it`
+    - `meta-llama/llama-4-scout-17b-16e-instruct`
     - `llama-3.3-70b-versatile`
-    - `llama-3.1-8b-instant`
+    - `gemma2-9b-it`
 session_state:
   header_df:
   - Property: Content-Type
