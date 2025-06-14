@@ -148,16 +148,15 @@ async def execute_service(request: Request):
     api_logger.info_log(f"{request.url.path} use Config: {config_data}")
 
     # 2. Config データへの user_input_* の適用 (プレースホルダ置換)
-    # processed_config = apply_user_inputs(config_data, user_inputs)
-    processed_config = config_data.get("session_state")
+    session_state = config_data.get("session_state")
 
     # 3. APIリクエスト情報の取得
-    api_url = processed_config.get("uri")
-    method = processed_config.get("method", "GET").upper()
+    api_url = session_state.get("uri")
+    method = session_state.get("method", "GET").upper()
     # headers = {"Content-Type": "application/json"}
     try:
-        # processed_config に api_key など、ヘッダー生成に必要な情報が含まれる想定
-        headers = convert_config_to_header(processed_config)
+        # session_state に api_key など、ヘッダー生成に必要な情報が含まれる想定
+        headers = convert_config_to_header(session_state)
         api_logger.debug_log(f"Generated headers: {headers}")
     except Exception as e:
         api_logger.error_log(f"Failed to convert config to header: {e}")
@@ -166,9 +165,9 @@ async def execute_service(request: Request):
             detail=f"Failed to process headers from config: {e}",
         )
 
-    req_body_template_str = processed_config.get("req_body")
+    req_body_template_str = session_state.get("req_body")
     print(f"req_body_template_str: {req_body_template_str}")
-    response_path = processed_config.get("user_property_path")
+    response_path = session_state.get("user_property_path")
 
     if not api_url:
         raise HTTPException(
@@ -257,7 +256,7 @@ async def execute_service(request: Request):
             method=method,
             # url=api_url,
             url=replaced_uri,
-            headers=headers,  # processed_config から取得したヘッダー
+            headers=headers,  # session_state から取得したヘッダー
             # data=None # 'json' を使う場合は 'data' は通常 None
             # body=(
             # json=(
@@ -413,11 +412,11 @@ async def post_messages(request: Request):
     print(f"config_data: {config_process.get_from_session_sts()}")
 
     # 2. Config データへの user_input_* の適用 (プレースホルダ置換)
-    processed_config = config_data.get("session_state")
+    session_state = config_data.get("session_state")
 
     # 3. APIリクエスト情報の取得
-    api_url = processed_config.get("uri")
-    method = processed_config.get("method", "GET").upper()
+    api_url = session_state.get("uri")
+    method = session_state.get("method", "GET").upper()
     if method not in ["POST", "PUT"]:
         raise HTTPException(
             status_code=400,
@@ -425,10 +424,10 @@ async def post_messages(request: Request):
         )
 
     try:
-        # processed_config に api_key など、ヘッダー生成に必要な情報が含まれる想定
-        headers = convert_config_to_header(processed_config)
+        # session_state に api_key など、ヘッダー生成に必要な情報が含まれる想定
+        headers = convert_config_to_header(session_state)
         api_logger.debug_log(f"Generated headers: {headers}")
-        response_path = processed_config.get("user_property_path")
+        response_path = session_state.get("user_property_path")
     except Exception as e:
         api_logger.error_log(f"Failed to convert config to header: {e}")
         raise HTTPException(
@@ -500,7 +499,7 @@ async def post_messages(request: Request):
             method=method,
             # url=api_url,
             url=replaced_uri,
-            headers=headers,  # processed_config から取得したヘッダー
+            headers=headers,  # session_state から取得したヘッダー
             # data=None # 'json' を使う場合は 'data' は通常 None
             # body=(
             # json=(
