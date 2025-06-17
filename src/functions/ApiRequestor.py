@@ -79,7 +79,7 @@ class ApiRequestor:
 
     def replace_uri(self, session_state, uri):
         replaced_uri = uri
-        for i in range(session_state.num_inputs):
+        for i in range(session_state["num_inputs"]):
             key = f"user_input_{i}"
             value = urllib.parse.quote(session_state[f"user_input_{i}"])
             replaced_uri = replaced_uri.replace(f"＜{key}＞", value)
@@ -88,7 +88,7 @@ class ApiRequestor:
 
     def replace_body(self, session_state, body):
         replaced_body = body
-        for i in range(session_state.num_inputs):
+        for i in range(session_state["num_inputs"]):
             key = f"user_input_{i}"
             value = session_state[f"user_input_{i}"].replace('"', "'")
             replaced_body = replaced_body.replace(f"＜{key}＞", value)
