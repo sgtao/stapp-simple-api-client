@@ -52,7 +52,7 @@ class ConfigProcess:
                 req_body_dict = req_body_data
             else:
                 # 想定外の型だった場合の警告
-                raise (f"'req_body' が予期せぬ型です: {type(req_body_data)}")
+                # raise (f"'req_body' が予期せぬ型です: {type(req_body_data)}")
                 req_body_dict = {}
 
         return req_body_dict
