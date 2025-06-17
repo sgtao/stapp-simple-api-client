@@ -113,14 +113,27 @@ async def config_title(request: Request):
     return {"result": result_data}
 
 
-@app.post("/api/v0/service")
-async def execute_service(request: Request):
+async def create_api_request(
+    request: Request,
+    APP_NAME="api_server",
+):
     """
-    config_file で指定したAPIを実行し、
-    JSON形式で`{"result": [user_property value]}`を返します。
+    リクエストからAPIリクエストの情報を抽出します。
+    :param request: FastAPIのRequestオブジェクト
+    :return: APIリクエストの情報 (辞書形式)
     """
-    api_logger = AppLogger(f"{APP_NAME}({request.url.path}):")
-    api_logger.info_log(f"Receive {request.method}")
+    api_logger = AppLogger(APP_NAME)
+    api_logger.info_log(f"Creating API request from {request.url.path}")
+
+    # 初期化
+    # api_request = {
+    #     "url": "",
+    #     "method": "GET",
+    #     "headers": {},
+    #     "body": {},
+    #     "response_path": None,
+    # }
+    api_request = {}
 
     # --- 1. リクエストと設定読み込み ---
     try:
@@ -148,7 +161,7 @@ async def execute_service(request: Request):
         session_state[key] = user_inputs.get(key, "")
     # api_logger.debug_log(f"session_state: {session_state}")
 
-    api_uri = config_process.get_from_session_sts("uri")
+    api_url = config_process.get_from_session_sts("uri")
     method = config_process.get_from_session_sts("method")
     headers = convert_config_to_header(session_state)
     req_body_dict = config_process.get_request_body()
@@ -158,37 +171,60 @@ async def execute_service(request: Request):
     # )
     req_body = json.loads(conf_req_body)
     dynamic_inputs = session_state.get("use_dynamic_inputs", False)
+    if dynamic_inputs:
+        """URIとリクエストボディの動的変数置換を行う"""
+        api_requestor = ApiRequestor()
+        api_url = api_requestor.replace_uri(session_state, api_url)
+        # api_logger.debug_log(f"api_url: {api_uri}")
+        _req_body = api_requestor.replace_body(session_state, conf_req_body)
+        # api_logger.debug_log(f"req_body: {_req_body}")
+        req_body = json.loads(_req_body)
+
     response_path = config_process.get_from_session_sts("user_property_path")
     # api_logger.debug_log(f"dynamic_inputs: {dynamic_inputs}")
+
+    api_request["url"] = api_url
+    api_request["method"] = method
+    api_request["headers"] = headers
+    api_request["req_body"] = req_body
+    api_request["response_path"] = response_path
+
+    api_logger.info_log(f"API Client Request is {api_request}")
+
+    return api_request
+
+
+async def send_api_request(
+    url,
+    method,
+    headers,
+    req_body,
+    response_path=None,
+    APP_NAME="api_server",
+):
+    """
+    APIRequestorを使ってAPIリクエストを送信します。
+    :param url: APIのURI
+    :param method: HTTPメソッド (GET, POST, PUT, DELETE)
+    :param headers: リクエストヘッダー (辞書形式)
+    :param req_body: リクエストボディ (辞書形式)
+    :return: レスポンスオブジェクト
+    """
+    # --- 1. Logger setting ---
+    api_logger = AppLogger(f"{APP_NAME}( to {url}):")
 
     # --- 2. APIRequestor を使った置換とリクエスト ---
     try:
         api_requestor = ApiRequestor()
-
-        # # FastAPI側では session_state に相当するものを dict で渡す必要があるので擬似的に再構成
-        # for i, (k, v) in enumerate(user_inputs.items()):
-        #     session_state[f"user_input_{i}"] = str(v)
-        # session_state["num_inputs"] = len(user_inputs)
-        if dynamic_inputs:
-            """URIとリクエストボディの動的変数置換を行う"""
-            api_uri = api_requestor.replace_uri(session_state, api_uri)
-            # api_logger.debug_log(f"api_url: {api_uri}")
-            _req_body = api_requestor.replace_body(
-                session_state, conf_req_body
-            )
-            # api_logger.debug_log(f"req_body: {_req_body}")
-            req_body = json.loads(_req_body)
-
         response = api_requestor.send_request(
-            url=api_uri, method=method, headers=headers, body=req_body
+            url=url, method=method, headers=headers, body=req_body
         )
-
         api_response_json = response.json()
-
     except Exception as e:
         api_logger.error_log(f"APIリクエスト失敗: {e}")
         raise HTTPException(status_code=502, detail=f"APIリクエスト失敗: {e}")
 
+    # return response
     # --- 3. レスポンス抽出 ---
     try:
         result = extract_property_from_json(api_response_json, response_path)
@@ -198,6 +234,42 @@ async def execute_service(request: Request):
         )
 
     return JSONResponse(content={"result": result})
+
+
+@app.post("/api/v0/service")
+async def execute_service(request: Request):
+    """
+    config_file で指定したAPIを実行し、
+    JSON形式で`{"result": [user_property value]}`を返します。
+    """
+    api_logger = AppLogger(f"{APP_NAME}({request.url.path}):")
+    api_logger.info_log(f"Receive {request.method}")
+
+    # --- 1. リクエストと設定読み込み ---
+    try:
+        api_request = await create_api_request(
+            request=request,
+            APP_NAME=f"{APP_NAME}({request.url.path}):",
+        )
+    except Exception as e:
+        api_logger.error_log(f"APIリクエスト作成失敗: {e}")
+        raise HTTPException(
+            status_code=400, detail=f"APIリクエスト作成失敗: {e}"
+        )
+
+    # --- 2. APIRequestor を使った置換とリクエスト ---
+    try:
+        return await send_api_request(
+            url=api_request["url"],
+            method=api_request["method"],
+            headers=api_request["headers"],
+            req_body=api_request["req_body"],
+            response_path=api_request["response_path"],
+            APP_NAME=f"{APP_NAME}({request.url.path}):",
+        )
+    except Exception as e:
+        api_logger.error_log(f"APIリクエスト失敗: {e}")
+        raise HTTPException(status_code=502, detail=f"APIリクエスト失敗: {e}")
 
 
 # process request with message via `/api/v0/messages"`
