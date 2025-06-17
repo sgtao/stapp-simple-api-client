@@ -9,12 +9,11 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 import uvicorn
 import yaml
-import requests
-import urllib.parse
 
 from functions.ApiRequestor import ApiRequestor
 from functions.AppLogger import AppLogger
 from functions.ConfigProcess import ConfigProcess
+from functions.LlmAPI import LlmAPI
 
 # from src.components.ConfigFiles import ConfigFiles
 from components.ConfigFiles import ConfigFiles
@@ -164,7 +163,9 @@ async def create_api_request(
     api_url = config_process.get_from_session_sts("uri")
     method = config_process.get_from_session_sts("method")
     headers = convert_config_to_header(session_state)
-    req_body_dict = config_process.get_request_body()
+    req_body_dict = (
+        config_process.get_request_body() if method != "GET" else {}
+    )
     conf_req_body = json.dumps(req_body_dict, ensure_ascii=False)
     # api_logger.debug_log(
     #     f"conf_req_body(type{type(conf_req_body)}): {conf_req_body}"
@@ -280,187 +281,50 @@ async def post_messages(request: Request):
     config_file で指定したAPIを実行し、
     JSON形式で`{"result": [user_property value]}`を返します。
     """
-    api_logger = AppLogger(APP_NAME)
-    api_logger.info_log(f"{request.url.path} Receive {request.method}")
+    api_logger = AppLogger(f"{APP_NAME}({request.url.path}):")
+    api_logger.info_log(f"Receive {request.method}")
+
+    # --- 1. リクエストと設定読み込み ---
     try:
+        messages = []
+        api_request = await create_api_request(
+            request=request,
+            APP_NAME=f"{APP_NAME}({request.url.path}):",
+        )
+        if api_request["method"] == "GET":
+            api_logger.info_log("cannot support to GET request")
+            raise HTTPException(
+                status_code=400, detail="cannot support to GET request"
+            )
+        # get message from request
         body_data = await request.json()
-        api_logger.debug_log(
-            f"{request.url.path} Receive message is {body_data}"
-        )
-    except json.JSONDecodeError:
-        raise HTTPException(
-            status_code=400, detail="Invalid JSON format in request body"
-        )
-
-    # リクエストボディの検証
-    if "messages" not in body_data:
-        raise HTTPException(
-            status_code=400,
-            detail="Missing 'messages' in request body",
-        )
-    if not isinstance(body_data["messages"], list):
-        raise HTTPException(
-            status_code=400,
-            detail="'messages' should be a list of message objects",
-        )
-
-    # 1. config_file の取得とYAML読み込み
-    print(f"Receive message in {body_data}")
-    config_file_path = body_data.get("config_file")
-    if not config_file_path:
-        raise HTTPException(
-            status_code=400,
-            detail="Missing 'config_file' in request body",
-        )
-    config_data = read_yaml_file(config_file_path)
-    config_process = ConfigProcess(config_data)
-    print(f"config_data: {config_process.get_from_session_sts()}")
-
-    # 2. Config データへの user_input_* の適用 (プレースホルダ置換)
-    session_state = config_data.get("session_state")
-
-    # 3. APIリクエスト情報の取得
-    api_url = session_state.get("uri")
-    method = session_state.get("method", "GET").upper()
-    if method not in ["POST", "PUT"]:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid method '{method}' specified in config",
-        )
-
-    try:
-        # session_state に api_key など、ヘッダー生成に必要な情報が含まれる想定
-        headers = convert_config_to_header(session_state)
-        api_logger.debug_log(f"Generated headers: {headers}")
-        response_path = session_state.get("user_property_path")
-    except Exception as e:
-        api_logger.error_log(f"Failed to convert config to header: {e}")
-        raise HTTPException(
-            status_code=400,
-            detail=f"Failed to process headers / body from config: {e}",
-        )
-
-    if not api_url:
-        raise HTTPException(
-            status_code=400, detail="Missing 'url' in processed config"
-        )
-
-    # 4. コンフィグ情報の置換
-    # number_user_inputs = body_data.get("num_user_inputs")
-    user_inputs = body_data.get("user_inputs")
-    replaced_uri = api_url
-    # print(f"Original URI: {api_url}")
-    print(f"user_inputs: {user_inputs}")
-    # # user_inputs が辞書であることを確認
-    # if isinstance(user_inputs, dict):
-    for key, user_input_value in user_inputs.items():
-        # user_input_value が None でないことを確認
-        if user_input_value is not None:
-            # print(
-            #     f"Replacing placeholder ＜{key}＞ with '{user_input_value}'"
-            # )
-            # URI の置換
-            value_encoded = urllib.parse.quote(str(user_input_value))
-            placeholder = f"＜{key}＞"
-            replaced_uri = replaced_uri.replace(f"＜{key}＞", value_encoded)
-            if placeholder in replaced_uri:
-                replaced_uri = replaced_uri.replace(placeholder, value_encoded)
-                api_logger.debug_log(
-                    f"Replaced '{placeholder}' in URI with '{value_encoded}'"
-                )
-    api_logger.debug_log(f"Final request URI: {replaced_uri}")
-
-    # リクエストボディのプレースホルダ置換とJSONパース
-
-    def replace_body(num_user_inputs, user_inputs, body):
-        replaced_body = body
-        for i in range(num_user_inputs):
-            key = f"user_input_{i}"
-            value = user_inputs[f"user_input_{i}"].replace('"', "'")
-            replaced_body = replaced_body.replace(f"＜{key}＞", value)
-
-        return replaced_body
-
-    # request_body_dict = None
-    request_body_dict = config_process.get_request_body()
-    print(request_body_dict)
-    num_user_inputs = body_data.get("num_user_inputs", 0)
-    user_inputs = body_data.get("user_inputs", {})
-    request_messages = request_body_dict.get("messages", [])
-    request_messages.append(body_data["messages"])
-    request_body_dict["messages"] = request_messages
-    send_body = replace_body(num_user_inputs, user_inputs, request_body_dict)
-    print(send_body)
-
-    # 5. 外部APIへのリクエスト発行
-    try:
-        # api_requestor = ApiRequestor()
-        api_requestor = requests.Session()  # セッションを使うと効率が良い
-        api_logger.api_start_log(replaced_uri, method, headers, send_body)
-
-        # response = api_requestor.send_request(
-        # response = await api_requestor.request(
-        response = api_requestor.request(
-            method=method,
-            # url=api_url,
-            url=replaced_uri,
-            headers=headers,  # session_state から取得したヘッダー
-            # data=None # 'json' を使う場合は 'data' は通常 None
-            # body=(
-            # json=(
-            #     # 4. 置換したリクエストボディ
-            #     # json.load(req_body_template)
-            #     req_body_template
-            #     if method in ["POST", "PUT"]
-            #     else None
-            # ),
-            json=request_body_dict,
-            timeout=30,
-        )
-        # HTTPエラーチェック
-        response.raise_for_status()
-        api_logger.api_success_log(response)
-        api_response_json = response.json()
+        messages = body_data.get("messages")
 
     except Exception as e:
-        # 予期せぬその他のエラー
-        api_logger.error_log(
-            f"An unexpected error occurred during API request execution: {e}",
-            exc_info=True,
-        )  # トレースバックも記録
+        api_logger.error_log(f"APIリクエスト作成失敗: {e}")
         raise HTTPException(
-            status_code=500,  # サーバー内部のエラー
-            detail=f"An internal server error occurred: {e}",
+            status_code=400, detail=f"APIリクエスト作成失敗: {e}"
         )
 
-    # 6. レスポンスの処理 (指定されたパスで抽出)
-    # extracted_value = api_response_json
+    # --- 2. LlmAPIを使った変換とリクエスト ---
     try:
-        extracted_value = extract_property_from_json(
-            api_response_json, response_path
-        )
-        if extracted_value is None and response_path:
-            api_logger.warning(
-                f"Property path '{response_path}' not found or null value."
-            )
-        else:
-            api_logger.info_log(
-                f"Successfully extracted value using path '{response_path}'"
-            )
-    except Exception as e:
-        api_logger.error_log(
-            f"""Failed to extract property using path '{response_path}'
-            from response: {e}""",
-            exc_info=True,
-        )
-        # 抽出失敗は内部エラーとして 500 を返すか、状況に応じて判断
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to process response from external API: {e}",
+        llm = LlmAPI(
+            # uri=sent_uri,
+            uri=api_request["url"],
+            header_dict=api_request["headers"],
+            req_body=api_request["req_body"],
+            user_property_path=api_request["response_path"],
         )
 
-    # 7. 結果の返却
-    return JSONResponse(content={"result": extracted_value})
+        # send message:
+        response = llm.single_response(messages)
+
+        # 結果の返却
+        return JSONResponse(content={"result": response})
+
+    except Exception as e:
+        api_logger.error_log(f"APIリクエスト失敗: {e}")
+        raise HTTPException(status_code=502, detail=f"APIリクエスト失敗: {e}")
 
 
 if __name__ == "__main__":
