@@ -23,5 +23,5 @@ session_state:
           n## 方法
           まず用語の概要を200文字以内で説明したあと、用例を5つ上げて説明してください。"
   uri: https://api.groq.com/openai/v1/chat/completions
-  use_dynamic_inputs: false
+  use_dynamic_inputs: true
   user_property_path: choices[0].message.content
