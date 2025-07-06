@@ -1,9 +1,8 @@
 # LlmAPI.py
 import json
 
-from components.ResponseViewer import extract_property_from_json
-
 from functions.ApiRequestor import ApiRequestor
+from functions.ResponseOperator import ResponseOperator
 
 # APP_TITLE = "APIクライアントアプリ"
 APP_TITLE = "LlmAPI"
@@ -24,6 +23,7 @@ class LlmAPI:
         self.req_body = req_body or {}
         self.api_requestor = ApiRequestor()
         self.user_property_path = user_property_path
+        self.response_op = ResponseOperator()
 
     def prepare_dynamic_request(self, session_state):
         """URIとリクエストボディの動的変数置換を行う"""
@@ -66,7 +66,7 @@ class LlmAPI:
             response = self.response(messages)
             # return response.json()["choices"][0]["message"]["content"]
             response_json = response.json()
-            return extract_property_from_json(
+            return self.response_op.extract_property_from_json(
                 response_json,
                 self.user_property_path,
             )

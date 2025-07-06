@@ -14,10 +14,12 @@ from functions.ApiRequestor import ApiRequestor
 from functions.AppLogger import AppLogger
 from functions.ConfigProcess import ConfigProcess
 from functions.LlmAPI import LlmAPI
+from functions.ResponseOperator import ResponseOperator
 
 # from src.components.ConfigFiles import ConfigFiles
 from components.ConfigFiles import ConfigFiles
-from components.ResponseViewer import extract_property_from_json
+
+# from components.ResponseViewer import extract_property_from_json
 
 app = FastAPI()
 APP_NAME = "api_server"
@@ -211,8 +213,9 @@ async def send_api_request(
     :param req_body: リクエストボディ (辞書形式)
     :return: レスポンスオブジェクト
     """
-    # --- 1. Logger setting ---
+    # --- 1. Logger setting and Instanciation ---
     api_logger = AppLogger(f"{APP_NAME}( to {url}):")
+    response_op = ResponseOperator()
 
     # --- 2. APIRequestor を使った置換とリクエスト ---
     try:
@@ -228,7 +231,9 @@ async def send_api_request(
     # return response
     # --- 3. レスポンス抽出 ---
     try:
-        result = extract_property_from_json(api_response_json, response_path)
+        result = response_op.extract_property_from_json(
+            api_response_json, response_path
+        )
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"レスポンス抽出エラー: {e}"
