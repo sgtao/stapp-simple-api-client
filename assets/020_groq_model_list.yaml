@@ -12,5 +12,4 @@ session_state:
   req_body: null
   uri: https://api.groq.com/openai/v1/models
   use_dynamic_inputs: true
-  user_property_path: data
-time_stamp: 20250506-090922
+  user_property_path: data[*].id
