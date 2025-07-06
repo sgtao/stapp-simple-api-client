@@ -1,6 +1,7 @@
 # ResponseViewer.py
 import json
 
+import jmespath
 import streamlit as st
 
 
@@ -25,6 +26,12 @@ def extract_property_from_json(json_data, property_path):
         keys = property_path.split(".")
         value = json_data
 
+        # when property_path has wildcard like "data[*].id"
+        if "[*]" in property_path:
+            value = jmespath.search(property_path, value)
+            return value
+
+        # when there is not wildcard in property_path
         for key in keys:
             # リストのインデックスにアクセスする場合
             if "[" in key and "]" in key:
