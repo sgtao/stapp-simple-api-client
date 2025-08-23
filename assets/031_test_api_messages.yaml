@@ -5,7 +5,7 @@ note: |
   - From [Grop API models for chat](https://console.groq.com/docs/models), select one and input `user_input_0`. i.e.:
     - `gemma2-9b-it`
     - `llama-3.3-70b-versatile`
-    - `llama-3.1-8b-instant`
+    - `openai/gpt-oss-120b`
 session_state:
   header_df:
   - Property: Content-Type
@@ -16,7 +16,7 @@ session_state:
     config_file: assets/024_groq_prompt_for_chatbot.yaml
     num_user_inputs: 1
     user_inputs: 
-      user_input_0: "llama-3.3-70b-versatile"
+      user_input_0: "openai/gpt-oss-120b"
     messages: 
       - role: "system"
         content: "あなたは聡明なAIです。
