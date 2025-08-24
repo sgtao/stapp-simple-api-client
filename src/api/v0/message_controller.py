@@ -1,5 +1,6 @@
 # message_controller.py
 from fastapi import APIRouter, Request, HTTPException
+from fastapi.responses import JSONResponse
 
 from functions.AppLogger import AppLogger
 from functions.LlmAPI import LlmAPI
@@ -10,23 +11,50 @@ router = APIRouter(tags=["Messages"])
 
 
 async def process_llm_request(request: Request):
-    api_request = await create_api_request(request)
-    if api_request["method"] == "GET":
+    api_logger = AppLogger(f"{APP_NAME}(process_llm_rqeuests):")
+    # --- 1. リクエストと設定読み込み ---
+    try:
+        messages = []
+        api_request = await create_api_request(request)
+        if api_request["method"] == "GET":
+            api_logger.info_log("cannot support to GET request")
+            raise HTTPException(
+                status_code=400, detail="cannot support to GET request"
+            )
+        # get message from request
+        body_data = await request.json()
+        messages = body_data.get("messages")
+
+    except Exception as e:
+        api_logger.error_log(f"APIリクエスト作成失敗: {e}")
         raise HTTPException(
-            status_code=400, detail="GET not supported for messages"
+            status_code=400, detail=f"APIリクエスト作成失敗: {e}"
         )
 
-    body_data = await request.json()
-    messages = body_data.get("messages")
+    if not messages:
+        raise HTTPException(
+            status_code=400, detail="messages not found in request body"
+        )
 
-    llm = LlmAPI(
-        uri=api_request["url"],
-        header_dict=api_request["headers"],
-        req_body=api_request["req_body"],
-        user_property_path=api_request["response_path"],
-    )
-    response = llm.single_response(messages)
-    return {"result": response}
+    # --- 2. LlmAPIを使った変換とリクエスト ---
+    try:
+        llm = LlmAPI(
+            # uri=sent_uri,
+            uri=api_request["url"],
+            header_dict=api_request["headers"],
+            req_body=api_request["req_body"],
+            user_property_path=api_request["response_path"],
+        )
+
+        # send message:
+        response = llm.single_response(messages)
+
+        # 結果の返却
+        return JSONResponse(content={"result": response})
+
+    except Exception as e:
+        api_logger.error_log(f"APIリクエスト失敗: {e}")
+        raise HTTPException(status_code=502, detail=f"APIリクエスト失敗: {e}")
 
 
 @router.post("/messages")
