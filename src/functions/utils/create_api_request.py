@@ -7,10 +7,8 @@ import pandas as pd
 
 from functions.ApiRequestor import ApiRequestor
 
-# from functions.ConfigProcess import ConfigProcess
 from functions.utils.read_yaml_file import read_yaml_file
 from functions.utils.convert_config_to_header import convert_config_to_header
-import streamlit as st
 
 
 def get_apikey():
@@ -19,6 +17,7 @@ def get_apikey():
         return os.getenv("API_KEY")
     else:
         return ""
+
 
 def replace_body(session_state, body_str):
 
@@ -46,7 +45,6 @@ def replace_body(session_state, body_str):
             return obj
 
     return replace_value(body)
-
 
 
 def make_session_state(config):
@@ -124,38 +122,22 @@ async def create_api_request(request: Request):
     config_data = read_yaml_file(config_file_path)
     config_data["api_key"] = get_apikey()
     session_state = make_session_state(config_data)
-    print(f"session_state: {session_state}")
-    # config_process = ConfigProcess(config_data)
-    # session_state = config_process.get_from_session_sts()
+    # print(f"session_state: {session_state}")
     session_state["num_inputs"] = num_user_inputs
     for i in range(num_user_inputs):
         session_state[f"user_input_{i}"] = user_inputs.get(
             f"user_input_{i}", ""
         )
 
-    # api_url = config_process.get_from_session_sts("uri")
-    # method = config_process.get_from_session_sts("method")
-    # headers = convert_config_to_header(session_state)
-    # req_body_dict = (
-    #     config_process.get_request_body() if method != "GET" else {}
-    # )
-    # req_body = json.loads(json.dumps(req_body_dict, ensure_ascii=False))
     api_url = session_state["uri"]
     method = session_state["method"]
     headers = convert_config_to_header(session_state)
-    # config_process = ConfigProcess(config_data)
-    # req_body_dict = (
-    #     config_process.get_request_body() if method != "GET" else {}
-    # )
-    # req_body = json.loads(json.dumps(req_body_dict, ensure_ascii=False))
-    # req_body = req_body_dict
-    req_body = session_state.get("req_body", {})
-    print(f"Original req_body: {req_body}")
+    req_body = session_state.get("req_body", {}) if method != "GET" else {}
+    # print(f"Original req_body: {req_body}")
 
     if session_state.get("use_dynamic_inputs", False):
         api_requestor = ApiRequestor()
         api_url = api_requestor.replace_uri(session_state, api_url)
-        # replaced = api_requestor.replace_body(
         replaced = replace_body(session_state, json.dumps(req_body))
 
         if isinstance(replaced, str):
@@ -172,13 +154,6 @@ async def create_api_request(request: Request):
 
         print(f"Replaced req_body: {req_body}")
 
-    # if session_state.get("use_dynamic_inputs", False):
-    #     api_requestor = ApiRequestor()
-    #     api_url = api_requestor.replace_uri(session_state, api_url)
-    #     req_body = json.loads(
-    #         api_requestor.replace_body(session_state, json.dumps(req_body))
-    #     )
-
     api_request = {
         "url": api_url,
         "method": method,
@@ -186,7 +161,5 @@ async def create_api_request(request: Request):
         "req_body": req_body,
         "response_path": session_state.get("user_property_path"),
     }
-
-    # api_logger.info_log(f"API Client Request is {api_request}")
 
     return api_request
