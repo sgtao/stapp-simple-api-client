@@ -15,9 +15,9 @@ from functions.AppLogger import AppLogger
 APP_TITLE = "Config Api Client"
 
 
-def apply_config_to_session_state(config):
-    for key, value in config.items():
-        st.session_state[key] = value
+def initialize_session_state():
+    if "config_loaded" not in st.session_state:
+        st.session_state.config_loaded = False
 
 
 def main():
@@ -52,8 +52,8 @@ def main():
         config = config_files.load_config_from_yaml(selected_config_file)
         config_files.render_config_viewer(selected_config_file, config)
 
+    if st.button("Load Config File", icon="📤"):
         # 読み込んだコンフィグをセッションステートに適用
-        # apply_config_to_session_state(config)
         client_controller.set_session_state(config)
 
         # ユーザー入力：APIリクエストの指定項目
@@ -71,36 +71,47 @@ def main():
         # リクエストボディ入力（POST, PUTの場合のみ表示）
         request_body = request_inputs.render_body_input()
 
-        if st.button("リクエストを送信"):
-            try:
-                # URIとリクエストボディのJSON形式検証
-                sent_uri = uri
-                sent_body = request_body
-                if st.session_state.use_dynamic_inputs:
-                    sent_uri = api_requestor.replace_uri(st.session_state, uri)
-                    if request_body:
-                        sent_body = api_requestor.replace_body(
-                            st.session_state, request_body
-                        )
+        st.session_state.config_loaded = True
+        # st.rerun()
 
-                # st.text(sent_body)
-                body_json = json.loads(sent_body) if request_body else None
+    if st.button(
+        "リクエストを送信",
+        disabled=not st.session_state.config_loaded,
+    ):
+        try:
+            # URIとリクエストボディのJSON形式検証
+            uri = request_inputs.get_uri()
+            method = request_inputs.get_method()
+            header_dict = request_header.get_header_dict()
+            request_body = request_inputs.get_req_body()
+            sent_uri = uri
+            sent_body = request_body
+            if st.session_state.use_dynamic_inputs:
+                sent_uri = api_requestor.replace_uri(st.session_state, uri)
+                if request_body:
+                    sent_body = api_requestor.replace_body(
+                        st.session_state, request_body
+                    )
 
-                response = api_requestor.send_request(
-                    sent_uri, method, header_dict, body_json
-                )
+            # st.text(sent_body)
+            body_json = json.loads(sent_body) if request_body else None
 
-                if response:
-                    st.subheader("レスポンス")
-                    response_viewer.render_viewer(response)
-            except Exception as e:
-                st.error(
-                    "リクエスト中にエラーが発生しました。詳細は以下をご確認ください。"
-                )
-                st.exception(e)
+            response = api_requestor.send_request(
+                sent_uri, method, header_dict, body_json
+            )
+
+            if response:
+                st.subheader("レスポンス")
+                response_viewer.render_viewer(response)
+        except Exception as e:
+            st.error(
+                "リクエスト中にエラーが発生しました。詳細は以下をご確認ください。"
+            )
+            st.exception(e)
 
 
 if __name__ == "__main__":
+    initialize_session_state()
     app_logger = AppLogger(APP_TITLE)
     app_logger.app_start()
     side_menus = SideMenus()
