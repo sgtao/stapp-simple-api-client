@@ -20,7 +20,7 @@ class ApiRequestHeader:
         self.header_df = st.data_editor(
             st.session_state.header_df,
             num_rows="dynamic",
-            use_container_width=True,
+            # use_container_width=True,
         )
         st.session_state.header_df = self.header_df
 
