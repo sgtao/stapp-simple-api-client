@@ -35,10 +35,8 @@ class ResponseViewer:
 
             if content_type == "application/json":
                 response_json = response.json()  # JSON形式の場合
-                return (
-                    self.response_op.extract_property_from_json(
-                        response_json, property_path
-                    )
+                return self.response_op.extract_property_from_json(
+                    response_json, property_path
                 )
             else:
                 return response.text
@@ -124,7 +122,6 @@ class ResponseViewer:
                 else:
                     # Text / HTML の場合
                     st.markdown(response.text)
-
 
         except json.JSONDecodeError:
             st.text(response.text)  # テキスト形式の場合
