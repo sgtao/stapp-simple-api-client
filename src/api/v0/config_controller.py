@@ -25,11 +25,11 @@ def get_config_title(config_file_path: str):
 @router.get("/configs")
 async def configs(request: Request):
     """
-    JSON形式で`{"result": [config_files]}`を返します。
+    JSON形式で`{"results": [config_files]}`を返します。
     """
     api_logger = AppLogger(APP_NAME)
     api_logger.info_log(f"{request.url.path} Receive {request.method}")
-    return {"result": get_config_list()}
+    return {"results": get_config_list()}
 
 
 @router.post("/config-title")
@@ -53,4 +53,4 @@ async def config_title(request: Request):
 
     result_data = get_config_title(config_file_path)
     api_logger.debug_log(f"Return Config title: {result_data}")
-    return {"result": result_data}
+    return {"results": result_data}

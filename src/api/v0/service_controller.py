@@ -93,11 +93,15 @@ async def send_api_request(url, method, headers, req_body, response_path=None):
     )
     api_logger.info_log(f"Return API response result: {result}")
 
-    return {"result": result}
+    return {"results": result}
 
 
 @router.post("/service")
 async def execute_service(request: Request):
+    """
+    リクエストを受け取り、config_file で指定したAPIを実行し、
+    JSON形式で`{"results": [user_property value]}`を返します。
+    """
     # --- 1. Logger setting and Instanciation ---
     api_logger = AppLogger(f"{APP_NAME}({request.url.path}):")
     api_logger.info_log(f"Receive {request.method}")

@@ -13,4 +13,4 @@ session_state:
     # config_file: assets/250815-01_get-config-title.yaml
     config_file: "＜user_input_0＞"
   use_dynamic_inputs: true
-  user_property_path: result.title
+  user_property_path: results.title

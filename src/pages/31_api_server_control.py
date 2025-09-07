@@ -147,7 +147,7 @@ def test_get_config_files(port):
             )
             # st.write(response.json())
             response_json = response.json()
-            st.session_state.config_files = response_json.get("result")
+            st.session_state.config_files = response_json.get("results")
             return response
     except requests.exceptions.RequestException as e:
         st.error(f"Failed to connect to API Server: {e}")
@@ -194,13 +194,6 @@ def modal_post_service(port, config_files):
         config_file = render_config_selector(config_files)
         if st.button(label="POST", icon="🚀"):
             try:
-                # # Config File 情報を取得
-                # config_title = test_config_title(
-                #     port=port, config_file=config_file
-                # )
-                # if "result" in config_title:
-                #     st.info(f"Run Config: {config_title["result"]}")
-
                 # POST リクエストを送信
                 response = test_post_service(
                     port=port, config_file=config_file
@@ -325,7 +318,7 @@ def main():
     # API接続テストボタン
     if st.session_state.api_process:
         # instantiation
-        response_viewer = ResponseViewer("result")
+        response_viewer = ResponseViewer("results")
         try:
             st.subheader("Test API Server")
             col1, col2 = st.columns(2)
@@ -366,6 +359,6 @@ if __name__ == "__main__":
     app_logger.app_start()
     initial_session_state()
     side_menus = SideMenus()
-    side_menus.set_user_property_path("result")
+    side_menus.set_user_property_path("results")
     side_menus.render_api_client_menu()
     main()

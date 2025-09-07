@@ -12,8 +12,8 @@ router = APIRouter(tags=["Config"])
 async def hello(request: Request):
     """
     GETとPOSTメソッドで`/api/v0/hello`エンドポイントにアクセスすると、
-    JSON形式で`{"result": "hello"}`を返します。
+    JSON形式で`{"results": "hello"}`を返します。
     """
     api_logger = AppLogger(APP_NAME)
     api_logger.info_log(f"{request.url.path} Receive {request.method}")
-    return {"result": "hello"}
+    return {"results": "hello"}

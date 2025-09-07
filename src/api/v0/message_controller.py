@@ -50,7 +50,7 @@ async def process_llm_request(request: Request):
         response = llm.single_response(messages)
 
         # 結果の返却
-        return JSONResponse(content={"result": response})
+        return JSONResponse(content={"results": response})
 
     except Exception as e:
         api_logger.error_log(f"APIリクエスト失敗: {e}")
@@ -62,7 +62,7 @@ async def post_messages(request: Request):
     """
     messagesを含むリクエストを受け取り、
     config_file で指定したAPIを実行し、
-    JSON形式で`{"result": [user_property value]}`を返します。
+    JSON形式で`{"results": [user_property value]}`を返します。
     """
     # --- 1. Logger setting and Instanciation ---
     api_logger = AppLogger(f"{APP_NAME}({request.url.path}):")
