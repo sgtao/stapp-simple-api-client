@@ -21,7 +21,7 @@ class ApiRequestInputs:
         if "req_body" not in st.session_state:
             st.session_state.req_body = "{}"
             if body is not None:
-                st.session_state.uri = body
+                st.session_state.req_body = body
             else:
                 st.session_state.req_body = "{}"
         if "use_dynamic_inputs" not in st.session_state:
