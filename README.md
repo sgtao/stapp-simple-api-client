@@ -1,4 +1,4 @@
-# stapp-simple-api-client
+d # stapp-simple-api-client
 任意のAPIサービスにアクセスする[streamlit](https://streamlit.io/)アプリです。
 
 ## Usage
@@ -12,8 +12,16 @@ poetry install
 # poetry shell # for poetry 1.x version
 eval $(poetry env activate) # for poetry 2.x version
 
+export API_KEY="xxxxxxx"
 # when finish poetry virtual env.
 deactivate
+```
+
+#### for Windows
+```PowerShell
+Invoke-Expression (poetry env activate)
+
+$env:API_KEY = "xxxx"
 ```
 
 ### コマンド一覧
