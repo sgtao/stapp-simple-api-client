@@ -12,7 +12,9 @@ poetry install
 # poetry shell # for poetry 1.x version
 eval $(poetry env activate) # for poetry 2.x version
 
+# when preset API-KEY, setenv it.
 export API_KEY="xxxxxxx"
+
 # when finish poetry virtual env.
 deactivate
 ```
