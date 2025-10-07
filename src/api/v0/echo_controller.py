@@ -26,7 +26,7 @@ async def extract_speified_path(target, response_path=None):
     # result = target_json
     result = None
     if response_path is None or response_path == ".":
-      result = target
+        result = target
     else:
         result = response_op.extract_property_from_json(target, response_path)
     api_logger.info_log(f"Return API response result: {result}")
