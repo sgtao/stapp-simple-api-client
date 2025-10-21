@@ -29,6 +29,6 @@ st.page_link("pages/21_logs_viewer.py", label="View Logs", icon="📄")
 # API Serverページへのリンク
 st.page_link(
     "pages/31_api_server_control.py",
-    label="Use config_api_client like api server",
+    label="Go to control page of api server",
     icon="⚙️",
 )
