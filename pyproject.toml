@@ -18,6 +18,7 @@ fastapi = "^0.115.12"
 uvicorn = "^0.34.0"
 requests = "^2.32.3"
 jmespath = "^1.0.1"
+httpx = "^0.28.1"
 
 
 [tool.poetry.group.dev.dependencies]
