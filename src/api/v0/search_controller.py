@@ -37,20 +37,7 @@ async def search_web(q: str = Query(..., description="Search keyword")):
 async def fetch_snippet(client: httpx.AsyncClient, url: str) -> str:
     """ページのスニペットをmetaタグや冒頭文から抽出"""
     try:
-        print(f"scrape uri: {url}")
-        # res = await client.get(url, timeout=5.0)
-        # soup = BeautifulSoup(res.text, "html.parser")
-
-        # # meta description優先
-        # print(soup.html())
-        # meta_desc = soup.find("meta", attrs={"name": "description"})
-        # if meta_desc and meta_desc.get("content"):
-        #     return meta_desc["content"].strip()
-
-        # # なければ最初の段落を利用
-        # first_p = soup.find("p")
-        # if first_p and first_p.text:
-        #     return first_p.text.strip()[:200]  # 長すぎる場合はカット
+        # print(f"scrape uri: {url}")
         # 1. URLを解析
         parsed = urlparse(url)
 
@@ -65,7 +52,7 @@ async def fetch_snippet(client: httpx.AsyncClient, url: str) -> str:
             return {"error": "Invalid DuckDuckGo category URI"}
 
         results = DDGS().text(query, max_results=5)
-        print(results)
+        # print(results)
         return results
     except Exception:
         return "(スニペット取得に失敗しました)"
