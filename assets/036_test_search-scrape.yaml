@@ -1,0 +1,14 @@
+# test_search_scrape.yaml
+title: test search_scrape api
+note: |
+  - `search_scrape` API をテストする
+  - `user_input_0`: Query Word
+session_state:
+  header_df:
+  - Property: Content-Type
+    Value: application/json
+  method: GET
+  req_body: null
+  uri: http://localhost:3000/api/v0/search_scrape?q=＜user_input_0＞
+  use_dynamic_inputs: true
+  user_property_path: 'results'

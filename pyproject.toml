@@ -19,6 +19,8 @@ uvicorn = "^0.34.0"
 requests = "^2.32.3"
 jmespath = "^1.0.1"
 httpx = "^0.28.1"
+bs4 = "^0.0.2"
+duckduckgo-search = "^8.1.1"
 
 
 [tool.poetry.group.dev.dependencies]
