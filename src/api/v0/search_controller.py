@@ -1,6 +1,6 @@
 # search_controller.py
 # from bs4 import BeautifulSoup
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Query
 import httpx
 from duckduckgo_search import DDGS
 from urllib.parse import urlparse
@@ -15,28 +15,27 @@ DUCK_API_URL = "https://api.duckduckgo.com/"
 
 
 @router.post("/search")
-async def search_web(request: Request):
-    api_logger = AppLogger(f"{APP_NAME}({request.url.path}):")
-    api_logger.info_log(f"Receive {request.method}")
-    body_data = await request.json()
-
-    """DuckDuckGoのInstant Answer APIで検索"""
-    q = body_data.get("query")
+async def search_web(q: str = Query(..., description="Search keyword")):
+    """DuckDuckGoのInstant Answer APIで検索＋スニペット抽出"""
     params = {"q": q, "format": "json", "no_redirect": 1, "no_html": 1}
+    results = []
+
     async with httpx.AsyncClient() as client:
         res = await client.get(DUCK_API_URL, params=params)
         data = res.json()
 
-    results = []
-    if "RelatedTopics" in data:
-        for topic in data["RelatedTopics"]:
-            if "Text" in topic:
-                results.append(
-                    {
-                        "title": topic["Text"],
-                        "url": topic.get("FirstURL", ""),
-                    }
-                )
+        if "RelatedTopics" in data:
+            # RelatedTopics からURLとタイトルを取得
+            for topic in data["RelatedTopics"]:
+                if "Text" in topic and "FirstURL" in topic:
+                    snippet = await fetch_snippet(client, topic["FirstURL"])
+                    results.append(
+                        {
+                            "title": topic["Text"],
+                            "uri": topic["FirstURL"],
+                            "snippet": snippet,
+                        }
+                    )
 
     return {"count": len(results), "results": results}
 
