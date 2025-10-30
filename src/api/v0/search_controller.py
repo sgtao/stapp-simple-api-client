@@ -63,47 +63,53 @@ async def fetch_snippet(client: httpx.AsyncClient, url: str) -> str:
         # print(results)
         return results
     except Exception:
-        return "(スニペット取得に失敗しました)"
-    return "(説明文なし)"
+        raise "(スニペット取得に失敗しました)"
+    # return "(説明文なし)"
 
 
 @router.post("/search_scrape")
 async def search_scrape(request: Request):
     api_logger = AppLogger(f"{APP_NAME}({request.url.path}):")
     api_logger.info_log(f"Receive {request.method}")
-    body_data = await request.json()
+    try:
+        body_data = await request.json()
 
-    """DuckDuckGoのInstant Answer APIで検索＋スニペット抽出"""
-    query = body_data.get("query")
-    # 半角・全角スペースをまとめてハイフン1個に置換
-    normalized = re.sub(r'[\s\u3000]+', '-', query.strip())
+        """DuckDuckGoのInstant Answer APIで検索＋スニペット抽出"""
+        query = body_data.get("query")
+        # 半角・全角スペースをまとめてハイフン1個に置換
+        normalized = re.sub(r"[\s\u3000]+", "-", query.strip())
 
-    params = {
-        "q": normalized,
-        "format": "json",
-        "no_redirect": 1,
-        "no_html": 1,
-    }
-    results = []
-    api_logger.info_log(f"Search: {params}")
+        params = {
+            "q": normalized,
+            "format": "json",
+            "no_redirect": 1,
+            "no_html": 1,
+        }
+        results = []
+        api_logger.info_log(f"Search: {params}")
 
-    async with httpx.AsyncClient() as client:
-        res = await client.get(DUCK_API_URL, params=params)
-        data = res.json()
+        async with httpx.AsyncClient() as client:
+            res = await client.get(DUCK_API_URL, params=params)
+            data = res.json()
 
-        if "RelatedTopics" in data:
-            # RelatedTopics からURLとタイトルを取得
-            for topic in data["RelatedTopics"]:
-                if "Text" in topic and "FirstURL" in topic:
-                    snippet = await fetch_snippet(client, topic["FirstURL"])
-                    results.append(
-                        {
-                            "title": topic["Text"],
-                            "uri": topic["FirstURL"],
-                            "snippet": snippet,
-                        }
-                    )
+            if "RelatedTopics" in data:
+                # RelatedTopics からURLとタイトルを取得
+                for topic in data["RelatedTopics"]:
+                    if "Text" in topic and "FirstURL" in topic:
+                        snippet = await fetch_snippet(client, topic["FirstURL"])
+                        results.append(
+                            {
+                                "title": topic["Text"],
+                                "uri": topic["FirstURL"],
+                                "snippet": snippet,
+                            }
+                        )
 
-    response = {"count": len(results), "results": results}
-    api_logger.info_log(f"search response: {response}")
-    return response
+        response = {"count": len(results), "results": results}
+        api_logger.info_log(f"search response: {response}")
+
+    except Exception as e:
+        api_logger.error_log(f"error occured: {e}")
+
+    finally:
+        return response
