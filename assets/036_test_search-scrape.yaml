@@ -3,6 +3,7 @@ title: test search_scrape api
 note: |
   - `search_scrape` API をテストする
   - `user_input_0`: Query Word
+    - 例）`openai`
 session_state:
   header_df:
   - Property: Content-Type

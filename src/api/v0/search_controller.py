@@ -1,4 +1,6 @@
 # search_controller.py
+import re
+
 # from bs4 import BeautifulSoup
 from fastapi import APIRouter, Request, Query
 import httpx
@@ -72,8 +74,16 @@ async def search_scrape(request: Request):
     body_data = await request.json()
 
     """DuckDuckGoのInstant Answer APIで検索＋スニペット抽出"""
-    q = body_data.get("query")
-    params = {"q": q, "format": "json", "no_redirect": 1, "no_html": 1}
+    query = body_data.get("query")
+    # 半角・全角スペースをまとめてハイフン1個に置換
+    normalized = re.sub(r'[\s\u3000]+', '-', query.strip())
+
+    params = {
+        "q": normalized,
+        "format": "json",
+        "no_redirect": 1,
+        "no_html": 1,
+    }
     results = []
     api_logger.info_log(f"Search: {params}")
 
