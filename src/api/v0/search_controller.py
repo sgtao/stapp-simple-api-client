@@ -96,7 +96,9 @@ async def search_scrape(request: Request):
                 # RelatedTopics からURLとタイトルを取得
                 for topic in data["RelatedTopics"]:
                     if "Text" in topic and "FirstURL" in topic:
-                        snippet = await fetch_snippet(client, topic["FirstURL"])
+                        snippet = await fetch_snippet(
+                            client, topic["FirstURL"]
+                        )
                         results.append(
                             {
                                 "title": topic["Text"],
